@@ -4,10 +4,11 @@ generator client {
 }
 
 datasource db {
-  // Postgres for deploy (Vercel sets DATABASE_URL). For purely-local SQLite dev,
-  // temporarily set provider = "sqlite" / url = "file:./dev.db". (See SPEC.md §8.)
+  // Postgres for deploy. Uses Neon's direct (non-pooling) URL that the Vercel
+  // integration provides. For purely-local SQLite dev, temporarily set
+  // provider = "sqlite" / url = "file:./dev.db". (See SPEC.md §8.)
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRES_URL_NON_POOLING")
 }
 
 // One record per person.
