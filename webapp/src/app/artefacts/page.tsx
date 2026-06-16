@@ -1,14 +1,13 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { Fragment, useEffect, useState, useCallback } from "react";
 
 type Post = {
   id: number; hook: string; body: string; scheduledDate: string;
   status: string; note: string | null; approved: boolean;
 };
 
-const STATUS_LABEL: Record<string, string> = { draft: "✎ Draft", scheduled: "◷ Scheduled", live: "● Live" };
+const CELL_LABEL: Record<string, string> = { draft: "DRAFT", scheduled: "SCHEDULED", live: "LIVE" };
 const DOW = [1, 3, 5]; // Mon, Wed, Fri
-const DOW_LABEL = ["Mon", "Wed", "Fri"];
 
 function weekStart(iso: string) {
   const x = new Date(iso);
@@ -22,7 +21,6 @@ export default function Artefacts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [selId, setSelId] = useState<number | null>(null);
   const [draftBody, setDraftBody] = useState("");
-  const [editing, setEditing] = useState(false);
 
   const refresh = useCallback(async () => {
     const r = await fetch("/api/posts", { cache: "no-store" });
@@ -31,9 +29,10 @@ export default function Artefacts() {
   }, []);
   useEffect(() => { refresh(); }, [refresh]);
 
+  const sorted = [...posts].sort((a, b) => +new Date(a.scheduledDate) - +new Date(b.scheduledDate));
   const sel = posts.find((p) => p.id === selId) ?? null;
-  const idx = sel ? posts.findIndex((p) => p.id === sel.id) : -1;
-  function open(p: Post) { setSelId(p.id); setDraftBody(p.body); setEditing(false); }
+  const idx = sel ? sorted.findIndex((p) => p.id === sel.id) : -1;
+  function open(p: Post) { setSelId(p.id); setDraftBody(p.body); }
 
   async function save(extra: Partial<Post> = {}) {
     if (!sel) return;
@@ -41,12 +40,12 @@ export default function Artefacts() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: sel.id, body: draftBody, ...extra }),
     });
-    setEditing(false);
     await refresh();
   }
 
+  // group into weeks
   const weeks: { key: number; label: string; slots: (Post | null)[] }[] = [];
-  for (const p of posts) {
+  for (const p of sorted) {
     const ws = weekStart(p.scheduledDate);
     const key = ws.getTime();
     let w = weeks.find((x) => x.key === key);
@@ -61,76 +60,70 @@ export default function Artefacts() {
 
   return (
     <>
-      <div className="top"><div>
-        <h1>Artefacts</h1>
-        <div className="sub">LinkedIn content — 3 posts a week (Mon · Wed · Fri). Click a post to read it.</div>
-      </div></div>
+      <div className="top">
+        <div><h1>Artefacts</h1><div className="sub">The whole campaign on one surface. Click any post to read, edit, or approve.</div></div>
+        <div className="countdown"><b>{posts.length}</b><span>posts · 3× / week</span></div>
+      </div>
 
-      {/* calendar grid — always visible */}
-      <div className="agrid">
-        <div className="ahead"></div>
-        {DOW_LABEL.map((d) => <div className="ahead" key={d}>{d}</div>)}
+      {/* calendar */}
+      <div className="cal">
+        <div className="colhdr"></div>
+        <div className="colhdr">Mon</div><div className="colhdr">Wed</div><div className="colhdr">Fri</div>
         {weeks.map((w) => (
-          <div key={w.key} style={{ display: "contents" }}>
-            <div className="awklabel">Week of<br /><b>{w.label}</b></div>
+          <Fragment key={w.key}>
+            <div className="wklbl">{w.label}</div>
             {w.slots.map((p, i) => p ? (
-              <div key={i} className={`acell ${p.status} ${selId === p.id ? "sel" : ""}`} onClick={() => open(p)}>
-                <div className="acelldate">{new Date(p.scheduledDate).toLocaleDateString("en", { month: "short", day: "numeric" })}</div>
-                <div className="acellhook">{p.hook}</div>
-                <span className={`ast ast-${p.status}`}>{STATUS_LABEL[p.status]}</span>
+              <div key={i} className={`acell ${p.status === "draft" ? "draft" : ""} ${selId === p.id ? "sel" : ""}`} onClick={() => open(p)}>
+                <div className="dnum">{new Date(p.scheduledDate).toLocaleDateString("en", { weekday: "short" }).toUpperCase()} {new Date(p.scheduledDate).getDate()}</div>
+                <div className="hk">{p.hook}</div>
+                <span className={`abadge ast-${p.status}`}>{CELL_LABEL[p.status]}</span>
               </div>
-            ) : <div key={i} className="acell empty-cell">+ add post</div>)}
-          </div>
+            ) : <div key={i} className="acell empty">+ add post</div>)}
+          </Fragment>
         ))}
       </div>
 
-      {/* reader — full width, in the page flow, below the calendar (no pop-up) */}
+      <div className="legend">
+        <span><span className="abadge ast-live">LIVE</span> posted</span>
+        <span><span className="abadge ast-scheduled">SCHEDULED</span> approved &amp; queued</span>
+        <span><span className="abadge ast-draft">DRAFT</span> needs Adam&apos;s review</span>
+        <span className="legamber">amber outline = waiting on you</span>
+      </div>
+
+      {/* side panel */}
       {sel && (
-        <section className="card postreader">
-          <div className="prhead">
-            <div>
-              <span className={`ast ast-${sel.status}`}>{STATUS_LABEL[sel.status]}</span>
-              <h2 className="prtitle">{sel.hook}</h2>
-              <div className="prmeta">
-                📅 {new Date(sel.scheduledDate).toLocaleDateString("en", { weekday: "long", month: "short", day: "numeric" })}
-                {sel.approved && <span className="appok">✓ approved</span>}
-                <span className="prcount"> · post {idx + 1} of {posts.length}</span>
+        <div className="backdrop" onClick={() => setSelId(null)}>
+          <div className="drawer ppanel" onClick={(e) => e.stopPropagation()}>
+            <div className="pp-top">
+              <div>
+                <div className="pphk">{sel.hook}</div>
+                <div className="ppmeta">{new Date(sel.scheduledDate).toLocaleDateString("en", { weekday: "long", month: "short", day: "numeric" })} · LinkedIn</div>
+              </div>
+              <div className="pp-topr">
+                <span className={`abadge ast-${sel.status}`}>{CELL_LABEL[sel.status]}</span>
+                <button className="x" onClick={() => setSelId(null)}>✕</button>
               </div>
             </div>
-            <button className="btn" onClick={() => setSelId(null)}>✕ Close</button>
-          </div>
 
-          {editing ? (
-            <textarea className="ptext" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} autoFocus />
-          ) : (
-            <p className="artbody">{sel.body}</p>
-          )}
-
-          <div className="prfoot">
-            <div className="prnav">
-              <button className="btn" disabled={idx <= 0} onClick={() => open(posts[idx - 1])}>‹ Prev</button>
-              <button className="btn" disabled={idx >= posts.length - 1} onClick={() => open(posts[idx + 1])}>Next ›</button>
+            <div className="pp-body">
+              <div className="field-lbl">Post body — edit, then Save{sel.approved && <span className="reviewed-flag">✓ Approved</span>}</div>
+              <textarea className="post-text" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} />
+              {sel.note && <div className="pp-note">📝 SAWA note: {sel.note}</div>}
             </div>
-            <div className="pactions">
-              {editing ? (
-                <>
-                  <button className="btn acc" onClick={() => save()}>Save</button>
-                  <button className="btn" onClick={() => { setDraftBody(sel.body); setEditing(false); }}>Cancel</button>
-                </>
-              ) : (
-                <>
-                  {["draft", "scheduled", "live"].map((s) => (
-                    <button key={s} className={`btn ${sel.status === s ? "acc" : ""}`} onClick={() => save({ status: s })}>
-                      {STATUS_LABEL[s]}
-                    </button>
-                  ))}
-                  <button className="btn" onClick={() => setEditing(true)}>✎ Edit</button>
-                  <button className="btn green" onClick={() => save({ approved: true })}>✓ Approve</button>
-                </>
-              )}
+
+            <div className="pp-foot">
+              <div className="walk">
+                <button className="arrow" disabled={idx <= 0} onClick={() => open(sorted[idx - 1])}>‹</button>
+                {idx + 1} of {sorted.length}
+                <button className="arrow" disabled={idx >= sorted.length - 1} onClick={() => open(sorted[idx + 1])}>›</button>
+              </div>
+              <div className="pp-actions">
+                <button className="pbtn" onClick={() => save()}>Save</button>
+                <button className="pbtn primary" onClick={() => save({ approved: true, status: "scheduled" })}>✓ Approve</button>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
       )}
     </>
   );
