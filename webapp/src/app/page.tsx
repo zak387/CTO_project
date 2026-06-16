@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useLeads, timeAgo, initials, type Lead } from "@/lib/useLeads";
 import LeadDrawer from "@/components/LeadDrawer";
+import { LiquidGlass } from "@/components/LiquidGlass";
+import { PopNumber } from "@/components/PopNumber";
 
 const daysToEvent = () =>
   Math.max(0, Math.ceil((new Date("2026-07-21").getTime() - Date.now()) / 86400000));
@@ -38,18 +40,18 @@ export default function Briefing() {
   return (
     <>
       <div className="top">
-        <div>
-          <h1>Good morning, Adam 👋</h1>
-          <div className="sub">Who needs you, and how the campaign&apos;s moving. {loaded ? "" : "Loading…"}</div>
+        <div className="t-stagger">
+          <h1 className="t-stagger-line t-stagger-line--1">Good morning, Adam</h1>
+          <div className="sub t-stagger-line t-stagger-line--2">Who needs you, and how the campaign&apos;s moving. {loaded ? "" : "Loading…"}</div>
         </div>
-        <div className="countdown"><b>{daysToEvent()}</b><span>days to dinner · Jul 21</span></div>
+        <LiquidGlass className="countdown" tint="rgba(255,255,255,.5)"><b>{daysToEvent()}</b><span>days to dinner · Jul 21</span></LiquidGlass>
       </div>
 
       {/* HERO */}
       <section className="card hero">
-        <h2><span>⚑ Waiting on you <span className="tag">— they replied on LinkedIn and are waiting for you to message them back</span></span> <span className="cnt">{waiting.length}</span></h2>
+        <h2><span>Waiting on you <span className="tag">— they replied on LinkedIn and are waiting for you to message them back</span></span> <span className="cnt"><PopNumber value={waiting.length} /></span></h2>
         {waiting.length === 0 ? (
-          <div className="empty">All caught up — nobody&apos;s waiting. 🎉</div>
+          <div className="empty">All caught up — nobody&apos;s waiting.</div>
         ) : (
           waiting.map((l) => (
             <div className="wrow" key={l.id} onClick={() => setSelectedId(l.id)} style={{ cursor: "pointer" }}>
@@ -80,8 +82,8 @@ export default function Briefing() {
             <div className="frow"><div className="name">Booked</div><div className="bar"><i style={w(pct(booked.length))}>{booked.length}</i></div></div>
           </div>
           <div className="split">
-            <div className="chip"><div className="t">Outbound booked</div><div className="v">{outBooked}</div></div>
-            <div className="chip"><div className="t">Inbound booked</div><div className="v">{inBooked}</div></div>
+            <div className="chip"><div className="t">Outbound booked</div><div className="v"><PopNumber value={outBooked} /></div></div>
+            <div className="chip"><div className="t">Inbound booked</div><div className="v"><PopNumber value={inBooked} /></div></div>
           </div>
         </section>
 

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useLeads, type Lead } from "@/lib/useLeads";
 import LeadDrawer from "@/components/LeadDrawer";
+import { PopNumber } from "@/components/PopNumber";
 
 const dayKey = (d: Date) => d.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" });
 const time = (d: Date) => d.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" });
@@ -43,13 +44,13 @@ export default function Meetings() {
 
   return (
     <>
-      <div className="top"><div>
-        <h1>Meetings Booked</h1>
-        <div className="sub">Booked calls with Adam — nothing else.</div>
+      <div className="top"><div className="t-stagger">
+        <h1 className="t-stagger-line t-stagger-line--1">Meetings Booked</h1>
+        <div className="sub t-stagger-line t-stagger-line--2">Booked calls with Adam — nothing else.</div>
       </div></div>
 
       <section className="card">
-        <h2>Upcoming <span className="cnt">{upcoming.length}</span></h2>
+        <h2>Upcoming <span className="cnt"><PopNumber value={upcoming.length} /></span></h2>
         {upcoming.length === 0 ? (
           <div className="empty">No calls booked yet — they&apos;ll appear here the moment someone books with Adam.</div>
         ) : groupByDay(upcoming).map((g) => (

@@ -40,3 +40,4 @@ transitions.dev/
 # skill working state (not project files)
 .superpowers/
 .claude/
+.gstack/

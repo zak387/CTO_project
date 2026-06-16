@@ -1,5 +1,6 @@
 "use client";
 import { Fragment, useEffect, useState, useCallback } from "react";
+import { LiquidGlass } from "@/components/LiquidGlass";
 
 type Post = {
   id: number; hook: string; body: string; scheduledDate: string;
@@ -61,8 +62,8 @@ export default function Artefacts() {
   return (
     <>
       <div className="top">
-        <div><h1>Artefacts</h1><div className="sub">The whole campaign on one surface. Click any post to read, edit, or approve.</div></div>
-        <div className="countdown"><b>{posts.length}</b><span>posts · 3× / week</span></div>
+        <div className="t-stagger"><h1 className="t-stagger-line t-stagger-line--1">Artefacts</h1><div className="sub t-stagger-line t-stagger-line--2">The whole campaign on one surface. Click any post to read, edit, or approve.</div></div>
+        <LiquidGlass className="countdown" tint="rgba(255,255,255,.5)"><b>{posts.length}</b><span>posts · 3× / week</span></LiquidGlass>
       </div>
 
       {/* calendar */}
@@ -108,7 +109,7 @@ export default function Artefacts() {
             <div className="pp-body">
               <div className="field-lbl">Post body — edit, then Save{sel.approved && <span className="reviewed-flag">✓ Approved</span>}</div>
               <textarea className="post-text" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} />
-              {sel.note && <div className="pp-note">📝 SAWA note: {sel.note}</div>}
+              {sel.note && <div className="pp-note">SAWA note: {sel.note}</div>}
             </div>
 
             <div className="pp-foot">
@@ -119,7 +120,7 @@ export default function Artefacts() {
               </div>
               <div className="pp-actions">
                 <button className="pbtn" onClick={() => save()}>Save</button>
-                <button className="pbtn primary" onClick={() => save({ approved: true, status: "scheduled" })}>✓ Approve</button>
+                <LiquidGlass as="button" className="pbtn primary" tint="rgba(14,159,110,.88)" onClick={() => save({ approved: true, status: "scheduled" })}>✓ Approve</LiquidGlass>
               </div>
             </div>
           </div>

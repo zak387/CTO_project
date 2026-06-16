@@ -49,7 +49,7 @@ export default function Simulator() {
     <>
       <div className="top">
         <div>
-          <h1>⚡ Event Simulator</h1>
+          <h1>Event Simulator</h1>
           <div className="sub">Fire the exact payloads Dripify &amp; Calendly will send. Watch Briefing &amp; Pipeline update live.</div>
         </div>
         <button className="btn ghost" onClick={() => post("/api/reset", {}, "Reset demo data")}>↺ Reset demo data</button>
@@ -58,7 +58,7 @@ export default function Simulator() {
       <div className="simgrid">
         {/* DRIPIFY */}
         <div className="simcard">
-          <h3>🔗 Dripify — advance outbound leads</h3>
+          <h3>Dripify — advance outbound leads</h3>
           <p>Each click fires the next LinkedIn event for that lead and moves their card.</p>
           {advanceable.length === 0 ? (
             <div className="empty">Every outbound lead has already reached Replied.</div>
@@ -71,7 +71,7 @@ export default function Simulator() {
                   <small>now: {STAGE_LABELS[l.stage]}{l.stage === "message_sent" ? ` · ${followups} follow-up${followups === 1 ? "" : "s"}` : ""}</small>
                 </div>
                 {l.stage === "message_sent" && (
-                  <button className="btn ghost" onClick={() => fireDripify(l, "message_sent")}>＋ Follow-up</button>
+                  <button className="btn ghost" onClick={() => fireDripify(l, "message_sent")}>+ Follow-up</button>
                 )}
                 <button className="btn acc" onClick={() => fireDripify(l, next)}>▶ {STAGE_LABELS[next]}</button>
               </div>
@@ -81,12 +81,12 @@ export default function Simulator() {
 
         {/* CALENDLY + INBOUND */}
         <div className="simcard">
-          <h3>📅 Calendly — book / cancel</h3>
+          <h3>Calendly — book / cancel</h3>
           <p>Adam sends his own link. Booking arrives with a personal email + company → matched by company + name (no tagged link).</p>
           {repliedLeads.map((l) => (
             <div className="simrow" key={l.id}>
               <div className="who2">{l.name}<small>{l.company}</small></div>
-              <button className="btn green" onClick={() => book(l)}>📅 Book call</button>
+              <button className="btn green" onClick={() => book(l)}>Book call</button>
             </div>
           ))}
           {bookedLeads.map((l) => (
@@ -96,7 +96,7 @@ export default function Simulator() {
             </div>
           ))}
 
-          <h3 style={{ marginTop: 18 }}>🌱 Landing page — new inbound signup</h3>
+          <h3 style={{ marginTop: 18 }}>Landing page — new inbound signup</h3>
           <p>Creates a brand-new inbound lead (the list grows).</p>
           <div className="simrow">
             <input className="btn" style={{ flex: 1, fontWeight: 400 }} placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -108,7 +108,7 @@ export default function Simulator() {
               if (!form.name || !form.email) return say("Need at least name + email");
               post("/api/leads/inbound", { ...form, linkedin_url: "https://linkedin.com/in/" + form.name.toLowerCase().replace(/[^a-z]+/g, "-") }, `Inbound signup: ${form.name}`);
               setForm({ name: "", company: "", email: "", title: "CTO" });
-            }}>＋ Sign up</button>
+            }}>+ Sign up</button>
           </div>
         </div>
       </div>

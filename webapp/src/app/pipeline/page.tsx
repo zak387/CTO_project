@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLeads, type Lead } from "@/lib/useLeads";
 import { OUTBOUND_STAGES, INBOUND_STAGES, STAGE_LABELS } from "@/lib/stages";
 import LeadDrawer from "@/components/LeadDrawer";
+import { LiquidGlass } from "@/components/LiquidGlass";
 
 const LED: Record<string, string> = {
   connection_sent: "#94a3b8", connected: "#3b6bd6", message_sent: "#c97a12",
@@ -21,17 +22,17 @@ export default function Pipeline() {
 
   return (
     <>
-      <div className="top"><div><h1>Lead Pipeline</h1>
-        <div className="sub">Cards move on their own as Dripify &amp; Calendly fire.</div></div></div>
+      <div className="top"><div className="t-stagger"><h1 className="t-stagger-line t-stagger-line--1">Lead Pipeline</h1>
+        <div className="sub t-stagger-line t-stagger-line--2">Cards move on their own as Dripify &amp; Calendly fire.</div></div></div>
 
       <div className="controls">
         <div className="seg">
-          <button className={channel === "outbound" ? "on" : ""} onClick={() => setChannel("outbound")}>
+          <LiquidGlass as="button" className={channel === "outbound" ? "on" : ""} tint={channel === "outbound" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setChannel("outbound")}>
             Outbound {leads.filter((l) => l.channel !== "inbound").length}
-          </button>
-          <button className={channel === "inbound" ? "on" : ""} onClick={() => setChannel("inbound")}>
+          </LiquidGlass>
+          <LiquidGlass as="button" className={channel === "inbound" ? "on" : ""} tint={channel === "inbound" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setChannel("inbound")}>
             Inbound {leads.filter((l) => l.channel !== "outbound").length}
-          </button>
+          </LiquidGlass>
         </div>
       </div>
 
@@ -51,11 +52,11 @@ export default function Pipeline() {
                     <div className="ro">{l.title} · {l.company}</div>
                     {stage === "message_sent" && (() => {
                       const n = l.events.filter((e) => e.type === "message_sent").length;
-                      return <span className="follow">📨 {n} follow-up{n === 1 ? "" : "s"} sent</span>;
+                      return <span className="follow">{n} follow-up{n === 1 ? "" : "s"} sent</span>;
                     })()}
-                    {stage === "replied" && <span className="star">★ waiting on Adam</span>}
+                    {stage === "replied" && <span className="star">Waiting on Adam</span>}
                     {stage === "booked" && l.meetingAt && (
-                      <span className="mt">📅 {new Date(l.meetingAt).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      <span className="mt">{new Date(l.meetingAt).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                     )}
                   </div>
                 ))}
