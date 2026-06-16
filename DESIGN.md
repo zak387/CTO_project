@@ -2,7 +2,7 @@
 
 > The visual source of truth. Read this before any UI work.
 > Aesthetic: **Minimal Dark — developer-tool calm** (inspired by Resend/Vercel-class dashboards).
-> Preview: `mockups/spec-screens/min-preview.html`
+> Live in: `mockups/spec-screens/command-center.html` (the interactive prototype is now built in this system)
 
 _Created: 2026-06-16 · inspired by a reference dashboard_
 

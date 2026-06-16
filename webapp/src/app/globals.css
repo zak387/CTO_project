@@ -152,14 +152,17 @@ h1{font-size:21px;letter-spacing:-.4px}
 .psum::before{content:"▸ ";color:var(--muted)}
 details[open] .psum::before{content:"▾ "}
 
-/* artefacts: grid on left, inline panel on right (no pop-up) */
-.artwrap{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
-.artpanel{position:sticky;top:20px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-.artempty{color:var(--muted);font-size:13px;text-align:center;padding:40px 10px}
-.artptitle{font-size:17px;margin:10px 0 4px;letter-spacing:-.2px}
-.artpmeta{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+/* artefacts: full-width reader below the calendar (no pop-up) */
+.postreader{margin-top:18px;padding:20px;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.prhead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.prtitle{font-size:19px;margin:8px 0 4px;letter-spacing:-.2px}
+.prmeta{font-size:12.5px;color:var(--muted)}
+.prcount{color:var(--muted)}
 .appok{color:var(--green);font-weight:700;margin-left:10px}
-.artbody{font-size:13.5px;line-height:1.6;color:#33405a;background:#fdfcfa;border:1px solid var(--line);border-radius:10px;padding:13px;white-space:pre-wrap}
+.artbody{font-size:14px;line-height:1.65;color:#33405a;background:#fdfcfa;border:1px solid var(--line);border-radius:10px;padding:16px;white-space:pre-wrap;max-width:680px}
+.prfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.prnav{display:flex;gap:8px}
 
 /* artefacts grid */
 .agrid{display:grid;grid-template-columns:64px 1fr 1fr 1fr;gap:10px}
@@ -183,11 +186,10 @@ details[open] .psum::before{content:"▾ "}
 .prevnext{margin-top:16px;justify-content:space-between}
 .btn:disabled{opacity:.4;cursor:default}
 @media(max-width:980px){
-  .artwrap{grid-template-columns:1fr}
-  .artpanel{position:static}
   .agrid{grid-template-columns:48px 1fr 1fr 1fr;gap:6px}
   .acell{min-height:74px;padding:8px}
   .awklabel{font-size:9px}.awklabel b{font-size:11px}
+  .prhead{flex-direction:column}
 }
 
 @media(max-width:980px){
