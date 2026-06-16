@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Artefacts · Campaign Timeline · SAWA Command</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F4F7FC; --surface:#FFFFFF; --fill:#EDF2FA; --hover:#E6EDF7;
+    --text:#1B3A66; --muted:#5C7593; --faint:#93A6BF;
+    --hair:#E4EAF3; --border:#CCD8E8;
+    --blue:#2563EB; --blue-soft:rgba(37,99,235,.10);
+    --green:#0E9F6E; --green-soft:rgba(14,159,110,.12);
+    --amber:#B9710E; --amber-soft:rgba(185,113,14,.13);
+    --red:#DC2626; --red-soft:rgba(220,38,38,.10);
+    --shadow-sm:0 1px 2px rgba(20,45,85,.06);
+    --shadow:0 1px 3px rgba(20,45,85,.06),0 6px 16px rgba(20,45,85,.07);
+    --shadow-md:0 8px 28px rgba(20,45,85,.10);
+    --shadow-lg:0 24px 60px rgba(20,45,85,.20);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Geist',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg); color:var(--text);
+    font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+    font-weight:400;
+  }
+  ::selection{background:var(--blue-soft)}
+
+  /* ---------- Shell ---------- */
+  .app{display:flex; min-height:100vh}
+  .sidebar{
+    width:230px; flex:0 0 230px; background:var(--surface);
+    border-right:1px solid var(--hair); padding:20px 14px;
+    display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  }
+  .brand{display:flex; align-items:center; gap:11px; padding:6px 8px 18px}
+  .mark{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(135deg,#2563EB,#60A5FA);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 10px rgba(37,99,235,.28); flex:0 0 34px;
+  }
+  .brand-txt{display:flex; flex-direction:column; line-height:1.25}
+  .brand-name{font-weight:600; font-size:14px; letter-spacing:-.01em}
+  .brand-sub{font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.08em; font-weight:500}
+  .nav{display:flex; flex-direction:column; gap:2px; margin-top:6px}
+  .nav-label{font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.08em; font-weight:600; padding:14px 10px 6px}
+  .nav a{
+    display:flex; align-items:center; gap:11px; padding:9px 10px;
+    border-radius:8px; color:var(--muted); text-decoration:none;
+    font-weight:500; font-size:13.5px; transition:background .14s ease,color .14s ease;
+  }
+  .nav a svg{width:17px; height:17px; flex:0 0 17px}
+  .nav a:hover{background:var(--fill); color:var(--text)}
+  .nav a.active{background:var(--blue-soft); color:var(--blue)}
+  .side-foot{margin-top:auto; padding:10px 8px}
+  .who{display:flex; align-items:center; gap:10px}
+  .who-av{width:30px;height:30px;border-radius:50%;background:var(--fill);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;color:var(--muted)}
+  .who-txt{line-height:1.3}
+  .who-name{font-size:13px;font-weight:500}
+  .who-role{font-size:11px;color:var(--faint)}
+
+  /* ---------- Main ---------- */
+  .main{flex:1; min-width:0; padding:30px 38px 60px; max-width:1400px}
+  .pagehead{display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap}
+  h1{font-size:28px; font-weight:600; letter-spacing:-.01em}
+  .subtitle{color:var(--muted); margin-top:5px; font-size:14px; max-width:560px}
+
+  /* Countdown anchor */
+  .countdown{
+    background:var(--surface); border:1px solid var(--hair); border-radius:10px;
+    box-shadow:var(--shadow); padding:13px 18px; display:flex; align-items:center; gap:16px;
+  }
+  .cd-num{font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1; color:var(--blue)}
+  .cd-meta{line-height:1.3}
+  .cd-label{font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); font-weight:600}
+  .cd-date{font-size:13px; color:var(--muted); font-weight:500; margin-top:2px}
+
+  /* ---------- Review summary strip ---------- */
+  .review-strip{
+    margin-top:24px; background:var(--surface); border:1px solid var(--hair);
+    border-radius:10px; box-shadow:var(--shadow); padding:18px 22px;
+    display:flex; align-items:center; gap:26px; flex-wrap:wrap;
+    position:relative; overflow:hidden;
+  }
+  .review-strip::before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--amber)}
+  .rs-lead{display:flex; align-items:center; gap:13px; padding-left:6px}
+  .rs-ico{width:38px;height:38px;border-radius:9px;background:var(--amber-soft);display:flex;align-items:center;justify-content:center;color:var(--amber);flex:0 0 38px}
+  .rs-ico svg{width:20px;height:20px}
+  .rs-title{font-size:16px; font-weight:600}
+  .rs-sub{font-size:12.5px; color:var(--muted); margin-top:1px}
+  .rs-counts{display:flex; gap:30px; margin-left:auto; flex-wrap:wrap}
+  .rs-stat{display:flex; flex-direction:column; gap:2px}
+  .rs-stat .n{font-size:22px; font-weight:600; line-height:1; letter-spacing:-.01em}
+  .rs-stat .l{font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); font-weight:600}
+  .rs-stat.amber .n{color:var(--amber)}
+  .rs-stat.blue .n{color:var(--blue)}
+  .rs-stat.green .n{color:var(--green)}
+  .btn-approve-all{
+    background:var(--blue); color:#fff; border:none; border-radius:8px;
+    padding:10px 16px; font-family:inherit; font-weight:500; font-size:13px; cursor:pointer;
+    display:flex; align-items:center; gap:7px; box-shadow:var(--shadow-sm); transition:opacity .14s ease;
+  }
+  .btn-approve-all:hover{opacity:.9}
+  .btn-approve-all svg{width:15px;height:15px}
+
+  /* ---------- Timeline controls ---------- */
+  .tl-bar{display:flex; align-items:center; justify-content:space-between; gap:16px; margin:30px 0 12px; flex-wrap:wrap}
+  .tl-bar h2{font-size:15px; font-weight:600}
+  .tl-bar .hint{font-size:12.5px; color:var(--muted)}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; align-items:center}
+  .leg{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); font-weight:500}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+  .dot.amber{background:var(--amber)} .dot.blue{background:var(--blue)} .dot.green{background:var(--green)}
+
+  /* ---------- Timeline ---------- */
+  .timeline{
+    background:var(--surface); border:1px solid var(--hair); border-radius:10px;
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .tl-scroll{overflow-x:auto}
+  .tl-grid{min-width:980px}
+  /* Date axis header */
+  .axis{
+    display:grid; grid-template-columns:150px repeat(5,1fr);
+    border-bottom:1px solid var(--hair); position:relative; background:var(--fill);
+  }
+  .axis-corner{padding:13px 16px; font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); font-weight:600; display:flex; align-items:center}
+  .axis-cell{
+    padding:11px 14px; border-left:1px solid var(--hair); text-align:left; position:relative;
+  }
+  .axis-week{font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--faint); font-weight:600}
+  .axis-range{font-size:13px; font-weight:600; margin-top:2px}
+  .axis-cell.today-col{background:var(--blue-soft)}
+  .today-tag{
+    display:inline-block; margin-top:4px; font-size:9.5px; font-weight:600; color:var(--blue);
+    text-transform:uppercase; letter-spacing:.06em; background:rgba(37,99,235,.14);
+    padding:2px 7px; border-radius:999px;
+  }
+  .dinner-tag{
+    display:inline-block; margin-top:4px; font-size:9.5px; font-weight:600; color:var(--green);
+    text-transform:uppercase; letter-spacing:.06em; background:var(--green-soft);
+    padding:2px 7px; border-radius:999px;
+  }
+
+  /* Lanes */
+  .lane{display:grid; grid-template-columns:150px repeat(5,1fr); border-bottom:1px solid var(--hair)}
+  .lane:last-child{border-bottom:none}
+  .lane-head{
+    padding:16px; display:flex; flex-direction:column; gap:8px; background:var(--surface);
+    border-right:1px solid var(--hair);
+  }
+  .lane-chip{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:13.5px}
+  .lane-chip svg{width:16px;height:16px}
+  .lh-ico{width:28px;height:28px;border-radius:7px;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--muted);flex:0 0 28px}
+  .lane-sub{font-size:11.5px; color:var(--faint); font-weight:500}
+  .lane-cell{
+    border-left:1px solid var(--hair); padding:11px 11px 13px; min-height:118px;
+    display:flex; flex-direction:column; gap:9px; position:relative;
+  }
+  .lane-cell.today-col{background:rgba(37,99,235,.035)}
+
+  /* Artefact pill/card on the timeline */
+  .item{
+    background:var(--surface); border:1px solid var(--hair); border-radius:9px;
+    box-shadow:var(--shadow-sm); padding:9px 10px 9px; cursor:pointer;
+    transition:box-shadow .14s ease,border-color .14s ease,transform .14s ease;
+    position:relative;
+  }
+  .item:hover{box-shadow:var(--shadow-md); border-color:var(--border); transform:translateY(-1px)}
+  .item.needs{border-color:rgba(185,113,14,.4)}
+  .item.needs::before{content:""; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:3px; background:var(--amber)}
+  .item.needs{padding-left:13px}
+  .item-top{display:flex; align-items:center; gap:6px; margin-bottom:5px}
+  .it-dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+  .it-dot.amber{background:var(--amber)} .it-dot.blue{background:var(--blue)} .it-dot.green{background:var(--green)}
+  .it-when{font-size:10px; color:var(--faint); font-weight:600; text-transform:uppercase; letter-spacing:.05em}
+  .it-title{font-size:12.5px; font-weight:600; line-height:1.32; color:var(--text)}
+  .it-meta{font-size:11px; color:var(--muted); margin-top:3px}
+  .status-pill{
+    display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:600;
+    padding:3px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em; margin-top:7px;
+  }
+  .sp-amber{background:var(--amber-soft); color:var(--amber)}
+  .sp-blue{background:var(--blue-soft); color:var(--blue)}
+  .sp-green{background:var(--green-soft); color:var(--green)}
+  .approve-mini{
+    margin-top:8px; width:100%; background:var(--blue); color:#fff; border:none; border-radius:7px;
+    padding:7px 8px; font-family:inherit; font-weight:500; font-size:11.5px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity .14s ease;
+  }
+  .approve-mini:hover{opacity:.9}
+  .approve-mini svg{width:13px;height:13px}
+  .cell-empty{font-size:11px; color:var(--faint); align-self:flex-start; opacity:.6}
+
+  /* ---------- Drawer ---------- */
+  .backdrop{
+    position:fixed; inset:0; background:rgba(20,45,85,.28); backdrop-filter:blur(2px);
+    display:none; z-index:50;
+  }
+  .backdrop.open{display:block}
+  .drawer{
+    position:fixed; top:0; right:0; bottom:0; width:480px; max-width:92vw;
+    background:var(--surface); box-shadow:var(--shadow-lg); z-index:60;
+    transform:translateX(100%); transition:transform .25s ease;
+    display:flex; flex-direction:column;
+  }
+  .drawer.open{transform:translateX(0)}
+  .dr-top{padding:22px 24px 18px; border-bottom:1px solid var(--hair); display:flex; align-items:flex-start; justify-content:space-between; gap:14px}
+  .dr-chan{font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); font-weight:600}
+  .dr-title{font-size:18px; font-weight:600; margin-top:4px; letter-spacing:-.01em}
+  .dr-meta{font-size:12.5px; color:var(--muted); margin-top:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .x{background:var(--fill); border:none; width:32px; height:32px; border-radius:8px; cursor:pointer; color:var(--muted); font-size:15px; display:flex; align-items:center; justify-content:center; transition:background .14s ease}
+  .x:hover{background:var(--hover)}
+  .dr-body{padding:20px 24px; overflow-y:auto; flex:1}
+  .field-lbl{font-size:10px; text-transform:uppercase; letter-spacing:.07em; color:var(--faint); font-weight:600; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between}
+  .post-text{
+    width:100%; min-height:230px; resize:vertical; border:1px solid var(--border); border-radius:9px;
+    padding:14px 15px; font-family:inherit; font-size:13.5px; line-height:1.6; color:var(--text);
+    background:var(--surface); outline:none; transition:border-color .14s ease;
+  }
+  .post-text:focus{border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-soft)}
+  .note{margin-top:14px; background:var(--fill); border-radius:9px; padding:12px 14px; font-size:12.5px; color:var(--muted)}
+  .note b{color:var(--text); font-weight:600}
+  .dr-foot{padding:16px 24px; border-top:1px solid var(--hair); display:flex; align-items:center; gap:10px}
+  .pbtn{flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:11px; font-family:inherit; font-weight:500; font-size:13px; color:var(--text); cursor:pointer; box-shadow:var(--shadow-sm); transition:background .14s ease}
+  .pbtn:hover{background:var(--fill)}
+  .pbtn.primary{flex:1.4; background:var(--green); color:#fff; border:none; display:flex; align-items:center; justify-content:center; gap:7px}
+  .pbtn.primary:hover{opacity:.92}
+  .pbtn.primary svg{width:15px;height:15px}
+
+  @media(max-width:820px){
+    .sidebar{display:none}
+    .main{padding:22px 18px 50px}
+    .rs-counts{margin-left:0; gap:22px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.2 6.4L21 9.2l-5 4.4L17.6 21 12 17.3 6.4 21 8 13.6l-5-4.4 6.8-.8L12 2z" fill="#fff"/></svg>
+      </div>
+      <div class="brand-txt">
+        <span class="brand-name">SAWA Command</span>
+        <span class="brand-sub">NY CTO Dinner</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Campaign</div>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Overview</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Lead Pipeline</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Meetings Booked</a>
+      <a href="#" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4zM4 12h10v8H4zM18 12h2v8h-2z"/></svg>Artefacts</a>
+    </nav>
+    <div class="side-foot">
+      <div class="who">
+        <div class="who-av">AD</div>
+        <div class="who-txt">
+          <div class="who-name">Adam</div>
+          <div class="who-role">VIP · Campaign lead</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="pagehead">
+      <div>
+        <h1>Artefacts</h1>
+        <p class="subtitle">Everything shipping across all three channels, on one timeline. See what's coming — and approve what needs you before it goes out.</p>
+      </div>
+      <div class="countdown">
+        <div class="cd-num">35</div>
+        <div class="cd-meta">
+          <div class="cd-label">Days to dinner</div>
+          <div class="cd-date">Tue, July 21, 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review summary strip -->
+    <div class="review-strip">
+      <div class="rs-lead">
+        <div class="rs-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        </div>
+        <div>
+          <div class="rs-title">4 artefacts need your approval</div>
+          <div class="rs-sub">2 ship within 72 hours. Approved items drop off this list.</div>
+        </div>
+      </div>
+      <div class="rs-counts">
+        <div class="rs-stat amber"><span class="n">4</span><span class="l">Needs you</span></div>
+        <div class="rs-stat blue"><span class="n">5</span><span class="l">Scheduled</span></div>
+        <div class="rs-stat green"><span class="n">7</span><span class="l">Live / Sent</span></div>
+      </div>
+      <button class="btn-approve-all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Review all 4
+      </button>
+    </div>
+
+    <!-- Timeline bar -->
+    <div class="tl-bar">
+      <div>
+        <h2>Campaign timeline</h2>
+        <div class="hint">Now &rarr; the dinner. Amber items need approval before they ship.</div>
+      </div>
+      <div class="legend">
+        <span class="leg"><span class="dot amber"></span>Needs approval</span>
+        <span class="leg"><span class="dot blue"></span>Scheduled / Queued</span>
+        <span class="leg"><span class="dot green"></span>Live / Sent</span>
+      </div>
+    </div>
+
+    <!-- Timeline grid -->
+    <div class="timeline">
+      <div class="tl-scroll">
+        <div class="tl-grid">
+          <!-- Axis -->
+          <div class="axis">
+            <div class="axis-corner">Channel</div>
+            <div class="axis-cell today-col">
+              <div class="axis-week">This week</div>
+              <div class="axis-range">Jun 15&ndash;19</div>
+              <span class="today-tag">Today · Jun 16</span>
+            </div>
+            <div class="axis-cell">
+              <div class="axis-week">Week of</div>
+              <div class="axis-range">Jun 22&ndash;26</div>
+            </div>
+            <div class="axis-cell">
+              <div class="axis-week">Week of</div>
+              <div class="axis-range">Jun 29&ndash;Jul 3</div>
+            </div>
+            <div class="axis-cell">
+              <div class="axis-week">Week of</div>
+              <div class="axis-range">Jul 6&ndash;10</div>
+            </div>
+            <div class="axis-cell">
+              <div class="axis-week">Week of</div>
+              <div class="axis-range">Jul 13&ndash;21</div>
+              <span class="dinner-tag">Dinner · Jul 21</span>
+            </div>
+          </div>
+
+          <!-- Lane 1: Outbound messages -->
+          <div class="lane">
+            <div class="lane-head">
+              <div class="lane-chip">
+                <span class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                Outbound messages
+              </div>
+              <span class="lane-sub">LinkedIn notes via Dripify + email nudges</span>
+            </div>
+
+            <!-- wk1 today -->
+            <div class="lane-cell today-col">
+              <div class="item" onclick="openDrawer('out-connect')">
+                <div class="item-top"><span class="it-dot green"></span><span class="it-when">Live</span></div>
+                <div class="it-title">Connection request note v2</div>
+                <div class="it-meta">Sending to 142 leads</div>
+                <span class="status-pill sp-green">Live</span>
+              </div>
+            </div>
+            <!-- wk2 -->
+            <div class="lane-cell">
+              <div class="item needs" onclick="openDrawer('out-nudge1')">
+                <div class="item-top"><span class="it-dot amber"></span><span class="it-when">Ships Jun 24</span></div>
+                <div class="it-title">Follow-up nudge #1</div>
+                <div class="it-meta">Unaccepted invites</div>
+                <span class="status-pill sp-amber">Needs you</span>
+                <button class="approve-mini" onclick="event.stopPropagation();approveItem(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Approve</button>
+              </div>
+            </div>
+            <!-- wk3 -->
+            <div class="lane-cell">
+              <div class="item" onclick="openDrawer('out-email')">
+                <div class="item-top"><span class="it-dot blue"></span><span class="it-when">Queued Jul 1</span></div>
+                <div class="it-title">Bulk email nudge — "Still room at the table"</div>
+                <div class="it-meta">Unresponsive · ~60 leads</div>
+                <span class="status-pill sp-blue">Scheduled</span>
+              </div>
+            </div>
+            <!-- wk4 -->
+            <div class="lane-cell">
+              <div class="item needs" onclick="openDrawer('out-nudge2')">
+                <div class="item-top"><span class="it-dot amber"></span><span class="it-when">Ships Jul 8</span></div>
+                <div class="it-title">Follow-up nudge #2 (final)</div>
+                <div class="it-meta">Last LinkedIn touch</div>
+                <span class="status-pill sp-amber">Needs you</span>
+                <button class="approve-mini" onclick="event.stopPropagation();approveItem(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Approve</button>
+              </div>
+            </div>
+            <!-- wk5 -->
+            <div class="lane-cell">
+              <div class="item" onclick="openDrawer('out-final')">
+                <div class="item-top"><span class="it-dot blue"></span><span class="it-when">Queued Jul 16</span></div>
+                <div class="it-title">"Doors close Friday" email</div>
+                <div class="it-meta">Final RSVP push</div>
+                <span class="status-pill sp-blue">Scheduled</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lane 2: LinkedIn Posts -->
+          <div class="lane">
+            <div class="lane-head">
+              <div class="lane-chip">
+                <span class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 10v7M7 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 17v-4"/></svg></span>
+                LinkedIn Posts
+              </div>
+              <span class="lane-sub">Adam's organic content · 3&times; / week</span>
+            </div>
+
+            <!-- wk1 today -->
+            <div class="lane-cell today-col">
+              <div class="item" onclick="openDrawer('post-live')">
+                <div class="item-top"><span class="it-dot green"></span><span class="it-when">Mon · Live</span></div>
+                <div class="it-title">"Why most EU tech fails its first 90 days in NYC"</div>
+                <span class="status-pill sp-green">Live · 41 reactions</span>
+              </div>
+              <div class="item needs" onclick="openDrawer('post-wed')">
+                <div class="item-top"><span class="it-dot amber"></span><span class="it-when">Wed · Jun 18</span></div>
+                <div class="it-title">"The CTO question no one asks before scaling"</div>
+                <span class="status-pill sp-amber">Needs you</span>
+                <button class="approve-mini" onclick="event.stopPropagation();approveItem(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Approve</button>
+              </div>
+            </div>
+            <!-- wk2 -->
+            <div class="lane-cell">
+              <div class="item" onclick="openDrawer('post-q1')">
+                <div class="item-top"><span class="it-dot blue"></span><span class="it-when">Mon · Jun 22</span></div>
+                <div class="it-title">"3 things I'd tell a founder entering the US market"</div>
+                <span class="status-pill sp-blue">Scheduled</span>
+              </div>
+              <div class="item" onclick="openDrawer('post-q2')">
+                <div class="item-top"><span class="it-dot blue"></span><span class="it-when">Fri · Jun 26</span></div>
+                <div class="it-title">"What 200 NYC CTO conversations taught me"</div>
+                <span class="status-pill sp-blue">Scheduled</span>
+              </div>
+            </div>
+            <!-- wk3 -->
+            <div class="lane-cell">
+              <div class="item needs" onclick="openDrawer('post-dinner')">
+                <div class="item-top"><span class="it-dot amber"></span><span class="it-when">Wed · Jul 1</span></div>
+                <div class="it-title">"Why I'm hosting a dinner for 20 CTOs in NYC"</div>
+                <span class="status-pill sp-amber">Needs you</span>
+                <button class="approve-mini" onclick="event.stopPropagation();approveItem(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Approve</button>
+              </div>
+            </div>
+            <!-- wk4 -->
+            <div class="lane-cell">
+              <div class="item" onclick="openDrawer('post-q3')">
+                <div class="item-top"><span class="it-dot faint" style="background:var(--faint)"></span><span class="it-when">Mon · Jul 6</span></div>
+                <div class="it-title">"The hidden cost of hiring your first US engineer"</div>
+                <span class="status-pill sp-blue">Draft outline</span>
+              </div>
+            </div>
+            <!-- wk5 -->
+            <div class="lane-cell">
+              <div class="item" onclick="openDrawer('post-final')">
+                <div class="item-top"><span class="it-dot faint" style="background:var(--faint)"></span><span class="it-when">Fri · Jul 17</span></div>
+                <div class="it-title">"See you Tuesday — final seats" recap teaser</div>
+                <span class="status-pill sp-blue">Draft outline</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lane 3: Landing page -->
+          <div class="lane">
+            <div class="lane-head">
+              <div class="lane-chip">
+                <span class="lh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M8 14h8M8 17h5"/></svg></span>
+                Landing page
+              </div>
+              <span class="lane-sub">Inbound signup copy + welcome email</span>
+            </div>
+
+            <!-- wk1 today -->
+            <div class="lane-cell today-col">
+              <div class="item" onclick="openDrawer('lp-page')">
+                <div class="item-top"><span class="it-dot green"></span><span class="it-when">Live</span></div>
+                <div class="it-title">Signup page — headline, subhead &amp; CTA</div>
+                <div class="it-meta">18 signups so far</div>
+                <span class="status-pill sp-green">Live</span>
+              </div>
+            </div>
+            <!-- wk2 -->
+            <div class="lane-cell">
+              <div class="item needs" onclick="openDrawer('lp-welcome')">
+                <div class="item-top"><span class="it-dot amber"></span><span class="it-when">Go live Jun 23</span></div>
+                <div class="it-title">"Thanks for signing up" welcome email</div>
+                <div class="it-meta">Warm inbound follow-up</div>
+                <span class="status-pill sp-amber">Needs you</span>
+                <button class="approve-mini" onclick="event.stopPropagation();approveItem(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Approve</button>
+              </div>
+            </div>
+            <!-- wk3 -->
+            <div class="lane-cell">
+              <span class="cell-empty">&mdash;</span>
+            </div>
+            <!-- wk4 -->
+            <div class="lane-cell">
+              <div class="item" onclick="openDrawer('lp-update')">
+                <div class="item-top"><span class="it-dot blue"></span><span class="it-when">Jul 9</span></div>
+                <div class="it-title">Page refresh — "Final seats remaining"</div>
+                <span class="status-pill sp-blue">Scheduled</span>
+              </div>
+            </div>
+            <!-- wk5 -->
+            <div class="lane-cell">
+              <span class="cell-empty">&mdash;</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Drawer -->
+<div class="backdrop" id="backdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="dr-top">
+    <div>
+      <div class="dr-chan" id="dr-chan">LinkedIn Posts</div>
+      <div class="dr-title" id="dr-title">Post title</div>
+      <div class="dr-meta" id="dr-meta"></div>
+    </div>
+    <button class="x" onclick="closeDrawer()">&#10005;</button>
+  </div>
+  <div class="dr-body">
+    <div class="field-lbl"><span id="dr-fieldlbl">Post body — edit, then approve</span></div>
+    <textarea class="post-text" id="dr-text"></textarea>
+    <div class="note" id="dr-note"><b>SAWA note:</b> <span id="dr-note-txt"></span></div>
+  </div>
+  <div class="dr-foot">
+    <button class="pbtn" onclick="closeDrawer()">Save draft</button>
+    <button class="pbtn primary" onclick="approveFromDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Approve &amp; schedule</button>
+  </div>
+</aside>
+
+<script>
+  const DATA = {
+    'out-connect':{chan:'Outbound · LinkedIn note (Dripify)',title:'Connection request note v2',meta:'Live · sending to 142 leads',lbl:'Connection note — 280 char limit',note:'Approved Jun 14. 38% acceptance so far, above the 30% target.',
+      body:`Hi {firstName} — I lead US-market strategy work with tech leaders here in NYC. I'm pulling together a small, off-record dinner for CTOs/CIOs on July 21. Thought you might be a great fit — open to connecting?`},
+    'out-nudge1':{chan:'Outbound · Follow-up nudge #1',title:'Follow-up nudge #1',meta:'Ships Jun 24 · unaccepted invites',lbl:'LinkedIn DM — sent 3 days after invite',note:'Goes only to leads who have not accepted the connection. Keep it short and low-pressure.',
+      body:`Hi {firstName}, following up on my note — I'm hosting an invite-only dinner for ~20 NYC tech leaders on July 21, off the record, no pitch. If the timing's interesting I'd love to walk you through it on a quick call. No worries either way.`},
+    'out-email':{chan:'Outbound · Bulk email nudge',title:'"Still room at the table"',meta:'Queued Jul 1 · ~60 unresponsive leads',lbl:'Email — bulk nudge sequence',note:'Suppression rule active: anyone who has replied on LinkedIn is auto-removed before send.',
+      body:`Subject: Still a seat at the table, {firstName}?\n\nHi {firstName},\n\nWe've reserved a small number of seats for an invite-only CTO/CIO dinner in New York on July 21 — a candid, off-record evening on scaling tech leadership in the US.\n\nIf you'd like one of them, grab 15 minutes with Adam here: {calendlyLink}\n\nWarmly,\nThe SAWA team`},
+    'out-nudge2':{chan:'Outbound · Follow-up nudge #2 (final)',title:'Follow-up nudge #2 (final)',meta:'Ships Jul 8 · last LinkedIn touch',lbl:'LinkedIn DM — final touch',note:'This is the last automated outbound touch before we go quiet. Make the close warm, not pushy.',
+      body:`{firstName} — last note from me on this. The July 21 dinner is nearly full; I kept a seat in case the timing works for you. Happy to share the guest list privately on a 15-min call. If it's not the right moment, no problem at all — wishing you a great quarter.`},
+    'out-final':{chan:'Outbound · Final email',title:'"Doors close Friday"',meta:'Queued Jul 16 · final RSVP push',lbl:'Email — final RSVP push',note:'Sends to anyone still un-booked. Short, deadline-driven.',
+      body:`Subject: Doors close Friday for the July 21 dinner\n\nHi {firstName},\n\nWe're finalising the guest list this Friday. If you'd like the last seat at the NYC CTO/CIO dinner on July 21, here's Adam's calendar: {calendlyLink}\n\nAfter Friday we close RSVPs.\n\n— SAWA`},
+    'post-live':{chan:'LinkedIn Posts',title:'"Why most EU tech fails its first 90 days in NYC"',meta:'Live · Mon Jun 15 · 41 reactions, 7 comments',lbl:'Post body — already live',note:'Posted Mon 8:30am ET. Strong early engagement; two inbound signups attributed.',
+      body:`Most European tech companies don't lose the US market on product.\n\nThey lose it in the first 90 days — on relationships they never built.\n\nI've watched brilliant teams land in New York with a great roadmap and zero rooms to walk into. The deck was perfect. The network was empty.\n\nThe fix isn't more outbound. It's being in the right room with the right 20 people.\n\nMore on that this week. 👇`},
+    'post-wed':{chan:'LinkedIn Posts',title:'"The CTO question no one asks before scaling"',meta:'Scheduled Wed Jun 18 · 8:30am ET',lbl:'Post body — edit, then approve',note:'Drafted by SAWA from Adam\'s call notes. Awaiting Adam\'s voice check before it queues.',
+      body:`Before you scale your engineering org in a new market, there's one question almost no CTO asks:\n\n"Who here already trusts me?"\n\nNot "who's hiring." Not "who's funded." Trust.\n\nIn New York, the CTOs who move fast are the ones who spent their first month building a small circle of peers they could call at 9pm. That circle is worth more than any vendor shortlist.\n\nIt's exactly why I'm putting a few of them in one room next month.`},
+    'post-q1':{chan:'LinkedIn Posts',title:'"3 things I\'d tell a founder entering the US market"',meta:'Scheduled Mon Jun 22 · 8:30am ET',lbl:'Post body — scheduled',note:'Approved Jun 13. Queued in Dripify content slot.',
+      body:`3 things I'd tell any founder entering the US market:\n\n1. Your first 10 relationships matter more than your first 10 customers.\n2. "Warm" in the US is colder than you think — earn the room.\n3. Pick one city and go deep. For tech leadership, that's still New York.\n\nWhich would you add?`},
+    'post-q2':{chan:'LinkedIn Posts',title:'"What 200 NYC CTO conversations taught me"',meta:'Scheduled Fri Jun 26 · 8:30am ET',lbl:'Post body — scheduled',note:'Approved Jun 13.',
+      body:`Over the last two months I've had conversations with ~200 CTOs and CIOs across New York.\n\nThe pattern that surprised me most: the senior-most leaders are the loneliest in their decision-making. They have teams, boards, vendors — and almost no peers they can be candid with.\n\nThat's the gap I'm trying to close on July 21.`},
+    'post-dinner':{chan:'LinkedIn Posts',title:'"Why I\'m hosting a dinner for 20 CTOs in NYC"',meta:'Scheduled Wed Jul 1 · 8:30am ET',lbl:'Post body — edit, then approve',note:'This is the hero announcement post — biggest signup driver. Adam should review tone closely.',
+      body:`On July 21, I'm hosting 20 CTOs and CIOs for dinner in New York.\n\nNo stage. No pitch. No slides. Just 20 senior tech leaders, one long table, and the conversations that don't happen on LinkedIn.\n\nWe're keeping it small on purpose. If you're a CTO/CIO in the NY area and that sounds like your kind of evening, the link's in the comments — I'll personally walk you through it.`},
+    'post-q3':{chan:'LinkedIn Posts',title:'"The hidden cost of hiring your first US engineer"',meta:'Draft outline · target Mon Jul 6',lbl:'Outline — needs full draft from SAWA',note:'Still an outline. SAWA to expand before it reaches Adam for approval.',
+      body:`[OUTLINE — to be drafted]\n\nHook: the real cost of your first US engineering hire isn't salary.\n- comp benchmarking trap\n- visa + ramp time\n- the network they bring (or don't)\nClose: tie back to the value of peer relationships → dinner.`},
+    'post-final':{chan:'LinkedIn Posts',title:'"See you Tuesday — final seats" recap teaser',meta:'Draft outline · target Fri Jul 17',lbl:'Outline — needs full draft from SAWA',note:'Final pre-dinner post. To be written closer to the date once RSVPs firm up.',
+      body:`[OUTLINE — to be drafted]\n\nWarm, exclusive tone. "We're nearly full." Last 2-3 seats. Soft urgency. Link to Adam's calendar.`},
+    'lp-page':{chan:'Landing page',title:'Signup page — headline, subhead & CTA',meta:'Live · 18 signups so far',lbl:'Landing page copy — live',note:'Approved Jun 12. Conversion at 9% of unique visitors.',
+      body:`HEADLINE:\nA seat at New York's most candid CTO dinner.\n\nSUBHEAD:\nJuly 21, 2026 · 20 senior tech leaders · one table · zero pitches. Tell us where to send the details.\n\nFORM FIELDS:\nName · Work email · Company · Title\n\nCTA BUTTON:\nRequest my seat`},
+    'lp-welcome':{chan:'Landing page · Welcome email',title:'"Thanks for signing up" welcome email',meta:'Go live Jun 23 · warm inbound follow-up',lbl:'Welcome email — edit, then approve',note:'Triggered the moment someone signs up. Converts a soft lead into a booked call with Adam.',
+      body:`Subject: You're on the list — here's the next step\n\nHi {firstName},\n\nThanks for raising your hand for the July 21 CTO/CIO dinner in New York. Seats are limited and we keep the table small on purpose.\n\nThe best next step is a quick 15-minute call with Adam — he'll walk you through the evening and confirm your seat:\n\n{calendlyLink}\n\nLooking forward to it,\nAdam & the SAWA team`},
+    'lp-update':{chan:'Landing page',title:'Page refresh — "Final seats remaining"',meta:'Scheduled Jul 9',lbl:'Landing page update — scheduled',note:'Swaps the subhead to a scarcity line as the dinner nears.',
+      body:`UPDATED SUBHEAD:\nFinal seats remaining for July 21. If you lead tech in the NY area, request yours before we close RSVPs.\n\nCTA BUTTON (unchanged):\nRequest my seat`},
+  };
+
+  const drawer=document.getElementById('drawer');
+  const backdrop=document.getElementById('backdrop');
+
+  function openDrawer(key){
+    const d=DATA[key]; if(!d) return;
+    document.getElementById('dr-chan').textContent=d.chan;
+    document.getElementById('dr-title').textContent=d.title;
+    document.getElementById('dr-meta').textContent=d.meta;
+    document.getElementById('dr-fieldlbl').textContent=d.lbl;
+    document.getElementById('dr-text').value=d.body;
+    document.getElementById('dr-note-txt').textContent=d.note;
+    drawer.classList.add('open'); backdrop.classList.add('open');
+  }
+  function closeDrawer(){ drawer.classList.remove('open'); backdrop.classList.remove('open'); }
+  function approveFromDrawer(){ closeDrawer(); }
+
+  // Demo: approving an item turns it green and removes the amber affordance + recounts
+  function approveItem(btn){
+    const item=btn.closest('.item');
+    item.classList.remove('needs');
+    const dot=item.querySelector('.it-dot'); if(dot){dot.className='it-dot green';}
+    const pill=item.querySelector('.status-pill'); if(pill){pill.className='status-pill sp-blue'; pill.textContent='Scheduled';}
+    btn.remove();
+    recount();
+  }
+  function recount(){
+    const remaining=document.querySelectorAll('.item.needs').length;
+    const amberStat=document.querySelector('.rs-stat.amber .n');
+    const blueStat=document.querySelector('.rs-stat.blue .n');
+    if(amberStat) amberStat.textContent=remaining;
+    if(blueStat) blueStat.textContent=parseInt(blueStat.textContent)+1;
+    const title=document.querySelector('.rs-title');
+    const sub=document.querySelector('.rs-sub');
+    if(remaining===0){
+      title.textContent='All caught up — nothing needs your approval';
+      sub.textContent='New drafts will appear here as SAWA prepares them.';
+      document.querySelector('.btn-approve-all').style.display='none';
+    } else {
+      title.textContent=remaining+' artefact'+(remaining===1?'':'s')+' need'+(remaining===1?'s':'')+' your approval';
+      document.querySelector('.btn-approve-all').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Review all '+remaining;
+    }
+  }
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDrawer(); });
+</script>
+</body>
+</html>

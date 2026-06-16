@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Artefacts — SAWA Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #F4F7FC;
+    --surface: #FFFFFF;
+    --fill: #EDF2FA;
+    --hover: #E6EDF7;
+    --text: #1B3A66;
+    --muted: #5C7593;
+    --faint: #93A6BF;
+    --hair: #E4EAF3;
+    --border: #CCD8E8;
+    --blue: #2563EB;
+    --blue-soft: rgba(37,99,235,.10);
+    --green: #0E9F6E;
+    --green-soft: rgba(14,159,110,.12);
+    --amber: #B9710E;
+    --amber-soft: rgba(185,113,14,.13);
+    --red: #DC2626;
+    --red-soft: rgba(220,38,38,.10);
+    --shadow-sm: 0 1px 2px rgba(20,45,85,.06);
+    --shadow: 0 1px 3px rgba(20,45,85,.06), 0 6px 16px rgba(20,45,85,.07);
+    --shadow-md: 0 8px 28px rgba(20,45,85,.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { display: flex; min-height: 100vh; }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    width: 230px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--hair);
+    padding: 22px 16px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .brand { display: flex; align-items: center; gap: 11px; padding: 4px 8px 22px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, #2563EB, #60A5FA);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(37,99,235,.30);
+    flex-shrink: 0;
+  }
+  .brand-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .brand-name { font-weight: 600; font-size: 14px; letter-spacing: -.01em; color: var(--text); }
+  .brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); font-weight: 500; }
+
+  .nav { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+  .nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); font-weight: 600; padding: 6px 10px 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 10px; border-radius: 8px;
+    color: var(--muted); font-weight: 500; font-size: 13.5px;
+    text-decoration: none; cursor: pointer;
+    transition: background .14s ease, color .14s ease;
+  }
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .nav-item:hover { background: var(--hover); color: var(--text); }
+  .nav-item.active { background: var(--blue-soft); color: var(--blue); }
+  .nav-item.active svg { color: var(--blue); }
+
+  .sidebar-foot { margin-top: auto; padding: 12px 10px 2px; border-top: 1px solid var(--hair); }
+  .sb-user { display: flex; align-items: center; gap: 10px; }
+  .sb-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--fill); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .sb-user-txt { display: flex; flex-direction: column; line-height: 1.25; }
+  .sb-user-name { font-size: 13px; font-weight: 500; }
+  .sb-user-sub { font-size: 11px; color: var(--faint); }
+
+  /* ---------- Main ---------- */
+  .main { flex: 1; min-width: 0; padding: 34px 40px 60px; max-width: 1180px; }
+  .page-head { margin-bottom: 22px; }
+  .page-head h1 { font-size: 28px; font-weight: 600; letter-spacing: -.015em; }
+  .page-head .subtitle { color: var(--muted); font-size: 14px; margin-top: 5px; }
+
+  /* ---------- Summary strip ---------- */
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 26px;
+  }
+  .summary-lead { display: flex; align-items: center; gap: 16px; padding-right: 28px; border-right: 1px solid var(--hair); }
+  .summary-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--amber-soft); color: var(--amber);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .summary-icon svg { width: 22px; height: 22px; }
+  .summary-num { display: flex; align-items: baseline; gap: 9px; }
+  .summary-num b { font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+  .summary-num .lbl { font-size: 13px; color: var(--muted); font-weight: 500; max-width: 130px; line-height: 1.25; }
+
+  .summary-breakdown { display: flex; gap: 30px; flex: 1; }
+  .sb-stat { display: flex; flex-direction: column; gap: 4px; }
+  .sb-stat .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); font-weight: 600; }
+  .sb-stat .v { display: flex; align-items: baseline; gap: 6px; }
+  .sb-stat .v b { font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+  .sb-stat .v .of { font-size: 12px; color: var(--faint); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .dot.amber { background: var(--amber); }
+  .dot.blue { background: var(--blue); }
+  .dot.green { background: var(--green); }
+  .sb-stat .k-row { display: flex; align-items: center; gap: 7px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs-wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .segmented {
+    position: relative;
+    display: inline-flex;
+    background: var(--fill);
+    border: 1px solid var(--hair);
+    border-radius: 11px;
+    padding: 4px;
+    box-shadow: var(--shadow-sm);
+  }
+  .seg-pill {
+    position: absolute;
+    top: 4px; bottom: 4px; left: 4px;
+    background: var(--surface);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(20,45,85,.10);
+    transition: transform .26s cubic-bezier(.32,.72,0,1), width .26s cubic-bezier(.32,.72,0,1);
+    z-index: 0;
+  }
+  .seg-btn {
+    position: relative;
+    z-index: 1;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    transition: color .2s ease;
+    white-space: nowrap;
+  }
+  .seg-btn svg { width: 16px; height: 16px; }
+  .seg-btn.active { color: var(--text); font-weight: 600; }
+  .seg-count {
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--amber-soft);
+    color: var(--amber);
+    border-radius: 999px;
+    padding: 1px 7px;
+    min-width: 19px;
+    text-align: center;
+  }
+  .seg-btn:not(.active) .seg-count { background: var(--fill); color: var(--muted); }
+  .seg-count.zero { background: var(--fill); color: var(--faint); }
+
+  .queue-toggle { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  .toggle-switch { display: inline-flex; background: var(--fill); border: 1px solid var(--hair); border-radius: 999px; padding: 3px; }
+  .toggle-opt { font-size: 12.5px; font-weight: 500; padding: 5px 12px; border-radius: 999px; cursor: pointer; color: var(--muted); }
+  .toggle-opt.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); font-weight: 600; }
+
+  /* ---------- Queue ---------- */
+  .queue { display: flex; flex-direction: column; gap: 14px; }
+  .queue-section-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--faint); font-weight: 600; margin: 6px 0 -2px 2px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .queue-section-label .count-soft { color: var(--muted); }
+
+  .row {
+    background: var(--surface);
+    border: 1px solid var(--hair);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    cursor: pointer;
+  }
+  .row:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .row.needs { border-left: 3px solid var(--amber); }
+
+  .row-accent {
+    width: 38px; height: 38px; border-radius: 9px; flex-shrink: 0;
+    background: var(--fill); color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .row-accent svg { width: 19px; height: 19px; }
+  .row-accent.linkedin { background: var(--blue-soft); color: var(--blue); }
+  .row-accent.email { background: var(--fill); color: var(--muted); }
+
+  .row-body { flex: 1; min-width: 0; }
+  .row-top { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+  .row-title { font-size: 14.5px; font-weight: 600; letter-spacing: -.005em; }
+  .kind-pill {
+    font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+    background: var(--fill); color: var(--muted);
+    border-radius: 999px; padding: 2px 9px;
+  }
+  .row-snippet { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin-bottom: 11px; max-width: 640px; }
+  .row-snippet .quote { color: var(--text); }
+  .row-meta { display: flex; align-items: center; gap: 16px; color: var(--faint); font-size: 12.5px; flex-wrap: wrap; }
+  .row-meta .m { display: flex; align-items: center; gap: 6px; }
+  .row-meta svg { width: 14px; height: 14px; }
+  .mini-avatar { width: 19px; height: 19px; border-radius: 50%; background: var(--fill); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--muted); }
+
+  .row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex-shrink: 0; }
+  .status-pill {
+    font-size: 11.5px; font-weight: 600; border-radius: 999px;
+    padding: 4px 11px; display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .status-pill .dot { width: 6px; height: 6px; }
+  .status-pill.review { background: var(--amber-soft); color: var(--amber); }
+  .status-pill.scheduled { background: var(--blue-soft); color: var(--blue); }
+  .status-pill.live { background: var(--green-soft); color: var(--green); }
+
+  .row-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    border-radius: 8px; padding: 8px 14px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    box-shadow: var(--shadow-sm);
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: background .14s ease, border-color .14s ease, opacity .14s ease;
+    white-space: nowrap;
+  }
+  .btn svg { width: 15px; height: 15px; }
+  .btn:hover { background: var(--hover); }
+  .btn.ghost { border-color: transparent; box-shadow: none; background: transparent; color: var(--muted); padding: 8px 10px; }
+  .btn.ghost:hover { background: var(--hover); color: var(--text); }
+  .btn.approve {
+    background: var(--green); border-color: var(--green); color: #fff;
+    box-shadow: 0 1px 2px rgba(14,159,110,.25);
+  }
+  .btn.approve:hover { background: #0c8d61; }
+
+  .approved-flag { font-size: 12.5px; color: var(--green); font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .approved-flag svg { width: 15px; height: 15px; }
+  .scheduled-note { font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .scheduled-note svg { width: 14px; height: 14px; }
+
+  .empty-hint { text-align: center; color: var(--faint); font-size: 13px; padding: 20px; }
+
+  @media (max-width: 920px) {
+    .summary { flex-wrap: wrap; gap: 18px; }
+    .summary-lead { border-right: none; padding-right: 0; }
+  }
+  @media (max-width: 720px) {
+    .sidebar { display: none; }
+    .main { padding: 24px 18px 50px; }
+    .row { flex-wrap: wrap; }
+    .row-right { width: 100%; align-items: stretch; flex-direction: row; justify-content: space-between; }
+    .summary-breakdown { flex-wrap: wrap; gap: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L14.2 9.8L22 12L14.2 14.2L12 22L9.8 14.2L2 12L9.8 9.8L12 2Z" fill="#fff"/>
+        </svg>
+      </div>
+      <div class="brand-txt">
+        <span class="brand-name">SAWA Command</span>
+        <span class="brand-sub">NY CTO Dinner</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Campaign</div>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Overview
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="3" y2="20"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="9" cy="18" r="2"/><line x1="11" y1="6" x2="21" y2="6"/><line x1="17" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/></svg>
+        Lead Pipeline
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+        Meetings Booked
+      </a>
+      <a class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        Artefacts
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="sb-user">
+        <div class="sb-avatar">A</div>
+        <div class="sb-user-txt">
+          <span class="sb-user-name">Adam Reyes</span>
+          <span class="sb-user-sub">Campaign host</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="page-head">
+      <h1>Artefacts</h1>
+      <div class="subtitle">Everything that goes out under your name — review what's waiting, then approve. Approved items leave this list.</div>
+    </div>
+
+    <!-- ===== Summary strip ===== -->
+    <div class="summary">
+      <div class="summary-lead">
+        <div class="summary-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="summary-num">
+          <b>7</b>
+          <span class="lbl">items awaiting your approval</span>
+        </div>
+      </div>
+      <div class="summary-breakdown">
+        <div class="sb-stat">
+          <div class="k-row"><span class="dot amber"></span><span class="k">Outbound messages</span></div>
+          <div class="v"><b>3</b><span class="of">awaiting · 9 total</span></div>
+        </div>
+        <div class="sb-stat">
+          <div class="k-row"><span class="dot amber"></span><span class="k">LinkedIn Posts</span></div>
+          <div class="v"><b>3</b><span class="of">awaiting · 15 total</span></div>
+        </div>
+        <div class="sb-stat">
+          <div class="k-row"><span class="dot amber"></span><span class="k">Landing page</span></div>
+          <div class="v"><b>1</b><span class="of">awaiting · 4 total</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Tabs ===== -->
+    <div class="tabs-wrap">
+      <div class="segmented" id="seg">
+        <span class="seg-pill" id="segPill"></span>
+        <button class="seg-btn active" data-tab="outbound">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Outbound messages
+          <span class="seg-count">3</span>
+        </button>
+        <button class="seg-btn" data-tab="posts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          LinkedIn Posts
+          <span class="seg-count">3</span>
+        </button>
+        <button class="seg-btn" data-tab="landing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20"/><path d="M9 12l2-2 2 2 3-3"/></svg>
+          Landing page
+          <span class="seg-count">1</span>
+        </button>
+      </div>
+
+      <div class="queue-toggle">
+        <span>Show</span>
+        <div class="toggle-switch">
+          <span class="toggle-opt on">Needs review</span>
+          <span class="toggle-opt">All items</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Queue: OUTBOUND (active) ===== -->
+    <div class="queue" id="tab-outbound">
+      <div class="queue-section-label">Awaiting your approval <span class="count-soft">· 3</span></div>
+
+      <!-- Needs review 1 -->
+      <div class="row needs">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Connection request note</span>
+            <span class="kind-pill">LinkedIn · Dripify</span>
+          </div>
+          <div class="row-snippet"><span class="quote">"Hi {firstName} — I'm hosting a small, invite-only dinner for NYC tech leaders on Jul 21 and your work at {company} is exactly the perspective we want in the room. Mind if I share the details?"</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">SK</span>Drafted by Sara K. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Submitted Jun 15</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Sends to ~200 outbound leads</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions">
+            <button class="btn ghost">Edit</button>
+            <button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Needs review 2 -->
+      <div class="row needs">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Follow-up nudge #2</span>
+            <span class="kind-pill">LinkedIn · Dripify</span>
+          </div>
+          <div class="row-snippet"><span class="quote">"No worries if the timing's off, {firstName}. We're down to the last few seats for the Jul 21 dinner — 20 NYC CTOs/CIOs, one table, no pitch. If it's a fit I'd love to grab 15 minutes this week to walk you through it."</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">DM</span>Drafted by Diego M. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Submitted Jun 16</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Sent 4 days after nudge #1</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions">
+            <button class="btn ghost">Edit</button>
+            <button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Needs review 3 -->
+      <div class="row needs">
+        <div class="row-accent email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Email nudge — unresponsive outbound</span>
+            <span class="kind-pill">Email · Bulk follow-up</span>
+          </div>
+          <div class="row-snippet">Subject: <span class="quote">"One table, 20 NYC tech leaders — Jul 21"</span> — <span class="quote">"I'll keep this short. We're holding a seat at an invite-only dinner for NYC CTOs and CIOs. No vendors, no slides — just peers comparing notes on scaling teams into the US market. 15 minutes to see if it's a fit?"</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">SK</span>Drafted by Sara K. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Submitted Jun 16</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Excludes anyone who has replied</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions">
+            <button class="btn ghost">Edit</button>
+            <button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="queue-section-label" style="margin-top:18px;">Approved &amp; in rotation <span class="count-soft">· 4</span></div>
+
+      <!-- Live / approved 1 -->
+      <div class="row">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Follow-up nudge #1</span>
+            <span class="kind-pill">LinkedIn · Dripify</span>
+          </div>
+          <div class="row-snippet"><span class="quote">"Thanks for connecting, {firstName}! Quick reason I reached out — I'm pulling together a small dinner of NYC tech leaders on Jul 21. Would it be odd to send you the one-pager?"</span></div>
+          <div class="row-meta">
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live since Jun 9 · sent to 142 leads</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill live"><span class="dot green"></span>Live</span>
+          <span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 8</span>
+        </div>
+      </div>
+
+      <!-- Live / approved 2 -->
+      <div class="row">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Connection request note (v1)</span>
+            <span class="kind-pill">LinkedIn · Dripify</span>
+          </div>
+          <div class="row-snippet"><span class="quote">"Hi {firstName} — really admire what {company} is building. I work with tech leaders breaking into the US market and would value connecting."</span></div>
+          <div class="row-meta">
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Retired Jun 15 · replaced by v2 above</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill live"><span class="dot green"></span>Sent</span>
+          <span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, May 30</span>
+        </div>
+      </div>
+
+      <!-- Scheduled 1 -->
+      <div class="row">
+        <div class="row-accent email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Email nudge — final call</span>
+            <span class="kind-pill">Email · Bulk follow-up</span>
+          </div>
+          <div class="row-snippet">Subject: <span class="quote">"Closing the guest list this Friday"</span> — <span class="quote">"Last note from me — we finalize the Jul 21 table this Friday. If you'd like one of the remaining seats, here's my calendar."</span></div>
+          <div class="row-meta">
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Queued to send Jul 3</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill scheduled"><span class="dot blue"></span>Queued</span>
+          <span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 14</span>
+        </div>
+      </div>
+
+      <!-- Live / approved 4 -->
+      <div class="row">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top">
+            <span class="row-title">Reply handoff note (auto-reply pause)</span>
+            <span class="kind-pill">LinkedIn · Dripify</span>
+          </div>
+          <div class="row-snippet"><span class="quote">"Great — I'll have Adam reach out personally to find a time."</span> Triggers when a lead replies; pauses further nudges automatically.</div>
+          <div class="row-meta">
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live since Jun 9</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill live"><span class="dot green"></span>Live</span>
+          <span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 8</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Queue: POSTS (hidden) ===== -->
+    <div class="queue" id="tab-posts" style="display:none;">
+      <div class="queue-section-label">Awaiting your approval <span class="count-soft">· 3</span></div>
+
+      <div class="row needs">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">"The US market doesn't reward the loudest vendor"</span><span class="kind-pill">Post · Mon Jun 22</span></div>
+          <div class="row-snippet"><span class="quote">"Every founder breaking into the US thinks they need a bigger megaphone. The CTOs I talk to in NYC say the opposite: the deals happen in rooms of 20, not webinars of 2,000. Here's what I've learned hosting those rooms…"</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">DM</span>Drafted by Diego M. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Scheduled Mon Jun 22, 8:30am</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions"><button class="btn ghost">Edit</button><button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+        </div>
+      </div>
+
+      <div class="row needs">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">"What I ask every CTO before our first call"</span><span class="kind-pill">Post · Wed Jun 24</span></div>
+          <div class="row-snippet"><span class="quote">"One question separates the leaders who scale cleanly from the ones who firefight forever: 'What would break first if you doubled headcount tomorrow?' Three patterns I keep hearing in NYC…"</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">SK</span>Drafted by Sara K. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Scheduled Wed Jun 24, 8:30am</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions"><button class="btn ghost">Edit</button><button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+        </div>
+      </div>
+
+      <div class="row needs">
+        <div class="row-accent linkedin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">"Why I'm hosting a dinner instead of a conference"</span><span class="kind-pill">Post · Fri Jun 26</span></div>
+          <div class="row-snippet"><span class="quote">"On Jul 21 I'm sitting 20 NYC tech leaders around one table. No badges, no booths, no keynote. Just the conversations that usually happen in the hallway — made the whole point. Here's the thinking…"</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">DM</span>Drafted by Diego M. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Scheduled Fri Jun 26, 8:30am</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions"><button class="btn ghost">Edit</button><button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+        </div>
+      </div>
+
+      <div class="queue-section-label" style="margin-top:18px;">Approved &amp; scheduled <span class="count-soft">· 2</span></div>
+
+      <div class="row">
+        <div class="row-accent linkedin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">"The first 90 days of a US expansion, unfiltered"</span><span class="kind-pill">Post · Mon Jun 29</span></div>
+          <div class="row-snippet"><span class="quote">"Nobody tells you the hardest part of entering the US isn't the product — it's earning the first three reference customers who'll take your call…"</span></div>
+          <div class="row-meta"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Scheduled Mon Jun 29</span></div>
+        </div>
+        <div class="row-right"><span class="status-pill scheduled"><span class="dot blue"></span>Scheduled</span><span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 13</span></div>
+      </div>
+
+      <div class="row">
+        <div class="row-accent linkedin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">"3 hiring mistakes I see every scaling CTO make"</span><span class="kind-pill">Post · Fri Jun 19</span></div>
+          <div class="row-snippet"><span class="quote">"Posted last week and the comments were better than the post. The one that stuck with me: 'We hired for the org we wanted, not the one we had.'…"</span></div>
+          <div class="row-meta"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live since Fri Jun 19 · 64 reactions</span></div>
+        </div>
+        <div class="row-right"><span class="status-pill live"><span class="dot green"></span>Live</span><span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 17</span></div>
+      </div>
+    </div>
+
+    <!-- ===== Queue: LANDING (hidden) ===== -->
+    <div class="queue" id="tab-landing" style="display:none;">
+      <div class="queue-section-label">Awaiting your approval <span class="count-soft">· 1</span></div>
+
+      <div class="row needs">
+        <div class="row-accent email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+        </div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">Welcome email — "Thanks for signing up"</span><span class="kind-pill">Email · Inbound welcome</span></div>
+          <div class="row-snippet">Subject: <span class="quote">"You're on the list — let's find your seat"</span> — <span class="quote">"Thanks for raising your hand. The Jul 21 dinner is intentionally small, so I like to say hello before confirming seats. Grab 15 minutes with me here and I'll walk you through the evening."</span></div>
+          <div class="row-meta">
+            <span class="m"><span class="mini-avatar">SK</span>Drafted by Sara K. (SAWA)</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Submitted Jun 16</span>
+            <span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Auto-sends on every landing-page signup</span>
+          </div>
+        </div>
+        <div class="row-right">
+          <span class="status-pill review"><span class="dot amber"></span>Needs your approval</span>
+          <div class="row-actions"><button class="btn ghost">Edit</button><button class="btn approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+        </div>
+      </div>
+
+      <div class="queue-section-label" style="margin-top:18px;">Approved &amp; live <span class="count-soft">· 3</span></div>
+
+      <div class="row">
+        <div class="row-accent linkedin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20"/><path d="M9 12l2-2 2 2 3-3"/></svg></div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">Landing page headline &amp; subhead</span><span class="kind-pill">Landing · Hero</span></div>
+          <div class="row-snippet"><span class="quote">"A table for 20 NYC tech leaders. One night. No pitch."</span> — <span class="quote">"An invite-only dinner on July 21 for the CTOs and CIOs shaping how companies enter the US market. Request your seat below."</span></div>
+          <div class="row-meta"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live since Jun 2 · 31 signups</span></div>
+        </div>
+        <div class="row-right"><span class="status-pill live"><span class="dot green"></span>Live</span><span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 1</span></div>
+      </div>
+
+      <div class="row">
+        <div class="row-accent linkedin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20"/><path d="M9 12l2-2 2 2 3-3"/></svg></div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">Signup form &amp; CTA button</span><span class="kind-pill">Landing · Form</span></div>
+          <div class="row-snippet">Fields: <span class="quote">Name · Work email · Company · Title</span>. Button: <span class="quote">"Request my seat"</span>. Company field feeds lead matching.</div>
+          <div class="row-meta"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live since Jun 2</span></div>
+        </div>
+        <div class="row-right"><span class="status-pill live"><span class="dot green"></span>Live</span><span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 1</span></div>
+      </div>
+
+      <div class="row">
+        <div class="row-accent linkedin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H4z"/><path d="M2 20h20"/><path d="M9 12l2-2 2 2 3-3"/></svg></div>
+        <div class="row-body">
+          <div class="row-top"><span class="row-title">Confirmation screen</span><span class="kind-pill">Landing · Post-submit</span></div>
+          <div class="row-snippet"><span class="quote">"You're in. Adam will be in touch personally to confirm your seat — check your inbox for a note from him."</span></div>
+          <div class="row-meta"><span class="m"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Live since Jun 2</span></div>
+        </div>
+        <div class="row-right"><span class="status-pill live"><span class="dot green"></span>Live</span><span class="approved-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approved by you, Jun 1</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const seg = document.getElementById('seg');
+  const pill = document.getElementById('segPill');
+  const btns = [...seg.querySelectorAll('.seg-btn')];
+  const tabs = { outbound: 'tab-outbound', posts: 'tab-posts', landing: 'tab-landing' };
+
+  function movePill(btn) {
+    pill.style.width = btn.offsetWidth + 'px';
+    pill.style.transform = 'translateX(' + (btn.offsetLeft - 4) + 'px)';
+  }
+  function activate(btn) {
+    btns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    movePill(btn);
+    Object.values(tabs).forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById(tabs[btn.dataset.tab]).style.display = 'flex';
+  }
+  btns.forEach(b => b.addEventListener('click', () => activate(b)));
+  // init pill on the active button
+  window.addEventListener('load', () => movePill(seg.querySelector('.seg-btn.active')));
+  movePill(seg.querySelector('.seg-btn.active'));
+  window.addEventListener('resize', () => movePill(seg.querySelector('.seg-btn.active')));
+
+  // Approve interaction: row drops from "needs review" and decrements counters
+  document.querySelectorAll('.btn.approve').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const row = btn.closest('.row');
+      row.style.transition = 'opacity .25s ease, transform .25s ease, margin .25s ease, max-height .3s ease';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(12px)';
+      setTimeout(() => { row.style.display = 'none'; }, 260);
+    });
+  });
+
+  // Show toggle (visual only)
+  document.querySelectorAll('.toggle-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-opt').forEach(o => o.classList.remove('on'));
+      opt.classList.add('on');
+    });
+  });
+</script>
+</body>
+</html>

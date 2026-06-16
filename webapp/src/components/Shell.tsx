@@ -15,7 +15,6 @@ const ICONS: Record<string, ReactNode> = {
   pipeline: <S><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d="M15 3v18" /></S>,
   meetings: <S><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M3 10h18" /><path d="M8 2v4" /><path d="M16 2v4" /><path d="m9 16 2 2 4-4" /></S>,
   artefacts: <S><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></S>,
-  simulator: <S><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" /></S>,
 };
 
 const NAV = [
@@ -23,7 +22,6 @@ const NAV = [
   { href: "/pipeline", label: "Lead Pipeline", ic: "pipeline" },
   { href: "/meetings", label: "Meetings Booked", ic: "meetings" },
   { href: "/artefacts", label: "Artefacts", ic: "artefacts" },
-  { href: "/simulator", label: "Event Simulator", ic: "simulator" },
 ];
 
 export default function Shell({ children }: { children: React.ReactNode }) {

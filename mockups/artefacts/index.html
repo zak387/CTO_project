@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Artefacts redesign — 5 directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F4F7FC;--surface:#FFFFFF;--panel:#EDF2FA;--ink:#1B3A66;--muted:#5C7593;--faint:#93A6BF;
+    --line:#E4EAF3;--border:#CCD8E8;--accent:#2563EB;--accent-soft:rgba(37,99,235,.10);
+    --shadow:0 1px 3px rgba(20,45,85,.06),0 6px 16px rgba(20,45,85,.07);
+    --shadow-sm:0 1px 2px rgba(20,45,85,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Geist',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5;padding:48px 28px 80px}
+  .wrap{max-width:1060px;margin:0 auto}
+  .brandrow{display:flex;align-items:center;gap:11px;margin-bottom:26px}
+  .dot{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2563EB,#60A5FA);display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm)}
+  .dot svg{width:17px;height:17px}
+  .brandrow b{font-weight:600;font-size:15px}
+  .brandrow small{display:block;color:var(--faint);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+  h1{font-size:30px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:32px;max-width:720px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:20px 22px;display:flex;flex-direction:column;transition:.15s}
+  .card:hover{box-shadow:0 8px 28px rgba(20,45,85,.12);transform:translateY(-2px)}
+  .num{font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:20px;padding:2px 10px;align-self:flex-start;margin-bottom:12px}
+  .card h2{font-size:17px;font-weight:600;margin-bottom:7px}
+  .card p{color:var(--muted);font-size:13px;line-height:1.55;flex:1;margin-bottom:16px}
+  .open{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:var(--accent);color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:9px 15px;border-radius:8px;box-shadow:var(--shadow-sm)}
+  .open:hover{opacity:.92}
+  .open svg{width:15px;height:15px}
+  .note{margin-top:30px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;font-size:13px;color:var(--muted);box-shadow:var(--shadow-sm)}
+  .note b{color:var(--ink)}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brandrow">
+    <span class="dot"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2l2.6 6.8L21 11l-6.4 2.2L12 20l-2.6-6.8L3 11l6.4-2.2z"/></svg></span>
+    <div><b>SAWA Command</b><small>Artefacts redesign</small></div>
+  </div>
+
+  <h1>Artefacts — 5 directions</h1>
+  <p class="sub">Five takes on the new Artefacts section, all on the Minimal Light / Blue system. Same content model in every one — three categories (Outbound messages · LinkedIn Posts · Landing page) with a <b>review / approval focus</b> (surface what needs Adam, let him approve, editing secondary). They differ only in how the work is organised.</p>
+
+  <div class="grid">
+    <div class="card">
+      <span class="num">Option 1</span>
+      <h2>Tabbed channel queues</h2>
+      <p>A summary strip answers “what needs me?”, then a segmented control (Outbound / Posts / Landing) with a sliding active pill reveals each channel’s review queue — to-approve rows on top, approved/scheduled/live beneath.</p>
+      <a class="open" href="option-1-tabbed-queues.html">Open mockup <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a>
+    </div>
+    <div class="card">
+      <span class="num">Option 2</span>
+      <h2>Unified approval inbox</h2>
+      <p>One prioritised triage stream like an email client — everything awaiting Adam across all channels, soonest-to-ship first, channel-tagged. Two-pane: queue on the left, full preview + Approve on the right. Clear-your-inbox feel.</p>
+      <a class="open" href="option-2-approval-inbox.html">Open mockup <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a>
+    </div>
+    <div class="card">
+      <span class="num">Option 3</span>
+      <h2>Status board (kanban)</h2>
+      <p>A horizontal board: Draft → Needs your review → Scheduled → Live. Channel-coded cards from all three categories flow left-to-right; the “Needs your review” column is emphasised in amber. Approve moves a card rightward.</p>
+      <a class="open" href="option-3-status-board.html">Open mockup <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a>
+    </div>
+    <div class="card">
+      <span class="num">Option 4</span>
+      <h2>Campaign timeline</h2>
+      <p>Three parallel lanes (Outbound / Posts / Landing) on a shared date axis from today to the Jul 21 dinner — so Adam sees <i>when</i> everything ships and what must be approved before its date. Today marker + days-to-dinner anchor.</p>
+      <a class="open" href="option-4-campaign-timeline.html">Open mockup <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a>
+    </div>
+    <div class="card">
+      <span class="num">Option 5</span>
+      <h2>Stacked channel dashboard</h2>
+      <p>One calm scroll. A hero states the job (“5 awaiting your approval”), then three stacked panels — Outbound, Posts, Landing — each surfacing to-approve items at the top and tucking scheduled/live work quietly beneath. Overview-first.</p>
+      <a class="open" href="option-5-stacked-dashboard.html">Open mockup <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></a>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>These are mockups, not wired-up pages.</b> Buttons/animations are illustrative. Pick a direction (or mix two — e.g. a board’s structure with an inbox’s preview pane) and the next step is a short spec → implementation in the real Next.js app.
+  </div>
+</div>
+</body>
+</html>

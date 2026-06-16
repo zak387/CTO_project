@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artefacts — SAWA Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F7FC; --side:#FFFFFF; --surface:#FFFFFF; --panel:#EDF2FA; --hover:#E6EDF7;
+  --ink:#1B3A66; --muted:#5C7593; --faint:#93A6BF;
+  --line:#E4EAF3; --border:#CCD8E8;
+  --accent:#2563EB; --accent-soft:rgba(37,99,235,.10);
+  --green:#0E9F6E; --green-soft:rgba(14,159,110,.12);
+  --amber:#B9710E; --amber-soft:rgba(185,113,14,.13);
+  --red:#DC2626; --red-soft:rgba(220,38,38,.10);
+  --radius:10px;
+  --shadow-sm:0 1px 2px rgba(20,45,85,.06);
+  --shadow:0 1px 3px rgba(20,45,85,.06),0 6px 16px rgba(20,45,85,.07);
+  --shadow-md:0 8px 28px rgba(20,45,85,.10);
+  --shadow-lg:0 24px 60px rgba(20,45,85,.20);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:'Geist',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5;font-size:14px}
+a{color:inherit;text-decoration:none}
+
+/* shell */
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+.side{background:var(--side);color:var(--muted);padding:18px 14px;position:sticky;top:0;height:100vh;border-right:1px solid var(--line);box-shadow:1px 0 0 rgba(20,45,85,.02);display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--ink);font-size:14px}
+.brand .dot{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#2563EB,#60A5FA);display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm)}
+.brand .dot svg{width:15px;height:15px}
+.brand small{display:block;font-weight:400;color:var(--faint);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.nav{margin-top:26px;display:flex;flex-direction:column;gap:1px}
+.nav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:7px;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer}
+.nav a.active{background:var(--accent-soft);color:var(--accent)}
+.nav a:hover:not(.active){color:var(--ink);background:var(--hover)}
+.ic{width:17px;height:17px;display:inline-grid;place-items:center;opacity:.9;flex-shrink:0}
+.ic svg{width:17px;height:17px;display:block}
+.live{margin-top:auto;font-size:11.5px;color:var(--green);display:flex;align-items:center;gap:7px;border-top:1px solid var(--line);padding-top:14px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:p 2s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(14,159,110,.45)}70%{box-shadow:0 0 0 7px rgba(14,159,110,0)}100%{box-shadow:0 0 0 0 rgba(14,159,110,0)}}
+
+.main{padding:26px 30px 60px;min-width:0}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:28px;letter-spacing:-.01em;font-weight:600;color:var(--ink)}
+.sub{color:var(--muted);font-size:13.5px;margin-top:4px}
+.countdown{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 14px;text-align:center;white-space:nowrap;box-shadow:var(--shadow)}
+.countdown b{font-size:18px;color:var(--accent);line-height:1;font-weight:600}.countdown span{font-size:11px;color:var(--muted);margin-left:6px}
+
+/* review banner */
+.rbanner{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:var(--radius);box-shadow:var(--shadow);padding:15px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.rbanner .rb-ic{width:38px;height:38px;border-radius:9px;background:var(--amber-soft);color:var(--amber);display:grid;place-items:center;flex-shrink:0}
+.rbanner .rb-ic svg{width:20px;height:20px}
+.rb-txt{flex:1;min-width:200px}
+.rb-txt b{font-size:15px;font-weight:600;color:var(--ink)}
+.rb-txt .big{color:var(--amber)}
+.rb-txt small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.rb-stats{display:flex;gap:22px;align-items:center}
+.rb-stat{text-align:center}
+.rb-stat .v{font-size:20px;font-weight:600;line-height:1}
+.rb-stat .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600;margin-top:3px}
+.rb-stat.amber .v{color:var(--amber)}.rb-stat.blue .v{color:var(--accent)}.rb-stat.green .v{color:var(--green)}
+
+/* controls */
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px}
+.seg button{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:500;padding:6px 13px;border-radius:6px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px}
+.seg button.on{background:var(--surface);color:var(--accent);font-weight:600;box-shadow:var(--shadow-sm)}
+.seg button .chic{width:13px;height:13px}
+.spacer{flex:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lz{width:9px;height:9px;border-radius:3px}
+.lz.out{background:#7E8CA3}.lz.post{background:#5E7CC4}.lz.land{background:#9C7CC4}
+
+/* board */
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start}
+.col{background:transparent;min-width:0}
+.col-h{display:flex;align-items:center;justify-content:space-between;padding:0 4px 9px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.col-h .t{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.col-h .led{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.col-h .ct{font-size:15px;color:var(--ink);font-weight:600}
+.cards{display:flex;flex-direction:column;gap:10px}
+
+/* needs-review column emphasis */
+.col.review{background:rgba(185,113,14,.045);border:1px solid rgba(185,113,14,.22);border-radius:12px;padding:12px 12px 14px;box-shadow:0 1px 3px rgba(185,113,14,.07),0 8px 22px rgba(185,113,14,.07)}
+.col.review .col-h{border-bottom-color:rgba(185,113,14,.35);padding-top:0}
+.col.review .col-h .t{color:var(--amber)}
+.col.review .col-h .led{background:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+.col.review .col-h .ct{color:var(--amber)}
+
+/* draft / scheduled / live LED colors */
+.col.draft .col-h .led{background:var(--muted)}
+.col.sched .col-h .led{background:var(--accent)}
+.col.live .col-h .led{background:var(--green)}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px 13px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;box-shadow:var(--shadow-sm);border-left:3px solid var(--ch-out);position:relative;animation:pop .35s ease both}
+@keyframes pop{from{transform:scale(.985);opacity:.4}to{transform:none;opacity:1}}
+.card:hover{box-shadow:var(--shadow);border-color:var(--border);transform:translateY(-1px)}
+.card.chan-out{border-left-color:#7E8CA3}
+.card.chan-post{border-left-color:#5E7CC4}
+.card.chan-land{border-left-color:#9C7CC4}
+.card.attn{border:1px solid rgba(185,113,14,.3);border-left:3px solid var(--amber);box-shadow:var(--shadow-sm)}
+
+.c-top{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.chanlab{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--panel);border-radius:5px;padding:2px 7px}
+.chanlab svg{width:11px;height:11px}
+.c-date{margin-left:auto;font-size:11px;color:var(--faint);font-weight:500;white-space:nowrap}
+.c-title{font-size:13px;font-weight:600;color:var(--ink);line-height:1.35}
+.c-snip{font-size:12px;color:var(--muted);line-height:1.45;margin-top:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.c-foot{display:flex;align-items:center;gap:8px;margin-top:10px}
+.statpill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px}
+.statpill svg{width:11px;height:11px}
+.sp-draft{background:var(--panel);color:var(--muted)}
+.sp-review{background:var(--amber-soft);color:var(--amber)}
+.sp-sched{background:var(--accent-soft);color:var(--accent)}
+.sp-live{background:var(--green-soft);color:var(--green)}
+.approve{margin-left:auto;border:none;font-family:inherit;background:var(--green);color:#fff;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow-sm);transition:.12s}
+.approve svg{width:13px;height:13px}
+.approve:hover{opacity:.92}
+.approve.gone{opacity:0;transform:scale(.9);pointer-events:none}
+
+.col-empty{font-size:12px;color:var(--faint);text-align:center;padding:20px 8px;border:1px dashed var(--line);border-radius:8px}
+
+/* drawer */
+.backdrop{position:fixed;inset:0;background:rgba(20,45,85,.30);display:none;justify-content:flex-end;z-index:50}
+.backdrop.open{display:flex}
+.drawer{width:520px;max-width:100%;height:100vh;background:var(--surface);border-left:1px solid var(--line);overflow:auto;animation:slide .22s ease;box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
+@keyframes slide{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
+.dh{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2;gap:12px}
+.dh .chanlab{margin-bottom:8px}
+.dtitle{font-size:18px;font-weight:600;color:var(--ink);line-height:1.3}
+.dmeta{font-size:12.5px;color:var(--muted);margin-top:5px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.x{border:1px solid var(--line);background:var(--surface);width:30px;height:30px;border-radius:7px;cursor:pointer;color:var(--muted);box-shadow:var(--shadow-sm);flex-shrink:0;display:grid;place-items:center}
+.x:hover{color:var(--ink);border-color:var(--border)}
+.x svg{width:15px;height:15px}
+.dbody{padding:20px 22px;flex:1}
+.field-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.edithint{font-size:10.5px;color:var(--faint);font-weight:500;text-transform:none;letter-spacing:0;display:inline-flex;align-items:center;gap:5px}
+.edithint svg{width:12px;height:12px}
+.post-text{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;font-size:13.5px;line-height:1.6;color:var(--ink);min-height:200px;white-space:pre-wrap;font-family:inherit;resize:vertical}
+.post-text:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.metarow{display:flex;gap:10px;margin-top:16px}
+.metabox{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 13px;box-shadow:var(--shadow-sm)}
+.metabox .l{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);font-weight:600}
+.metabox .v{font-size:13px;font-weight:600;color:var(--ink);margin-top:4px}
+.df{padding:14px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface);display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.pbtn{font-size:12.5px;font-weight:600;padding:9px 15px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;box-shadow:var(--shadow-sm);font-family:inherit;display:inline-flex;align-items:center;gap:7px}
+.pbtn svg{width:14px;height:14px}
+.pbtn:hover{border-color:var(--accent);color:var(--accent)}
+.pbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.pbtn.primary:hover{opacity:.92;color:#fff;border-color:var(--green)}
+.df .pmeta{margin-right:auto;font-size:12px;color:var(--muted)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:500;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:9px;opacity:0;pointer-events:none;transition:.25s;z-index:90}
+.toast svg{width:16px;height:16px;color:#4ade80}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1100px){.board{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){
+  .app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;align-items:center;border-right:none;border-bottom:1px solid var(--line);padding:12px 16px;gap:14px}
+  .nav{margin-top:0;flex-direction:row;gap:2px;overflow-x:auto}
+  .nav a span:last-child{display:none}
+  .live{display:none}
+  .main{padding:18px 14px 50px}
+  .board{grid-template-columns:1fr}
+  .drawer{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="brand">
+      <div class="dot">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" fill="#fff"/></svg>
+      </div>
+      <div>SAWA Command<small>NY CTO Dinner</small></div>
+    </div>
+    <nav class="nav">
+      <a><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span><span>Overview</span></a>
+      <a><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span><span>Lead Pipeline</span></a>
+      <a><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span>Meetings Booked</span></a>
+      <a class="active"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg></span><span>Artefacts</span></a>
+    </nav>
+    <div class="live"><span class="pulse"></span> Syncing — Dripify · Calendly</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>Artefacts</h1>
+        <p class="sub">Every piece of campaign copy in one place. Your job: review what's waiting and approve it.</p>
+      </div>
+      <div class="countdown"><b>35</b><span>days to dinner · Jul 21</span></div>
+    </div>
+
+    <!-- REVIEW BANNER -->
+    <div class="rbanner">
+      <div class="rb-ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      </div>
+      <div class="rb-txt">
+        <b><span class="big">5 artefacts</span> are waiting on your approval</b>
+        <small>Nothing goes out until you sign off. Approved items move down the board automatically.</small>
+      </div>
+      <div class="rb-stats">
+        <div class="rb-stat amber"><div class="v" id="cnt-review">5</div><div class="l">Needs you</div></div>
+        <div class="rb-stat blue"><div class="v" id="cnt-sched">3</div><div class="l">Queued</div></div>
+        <div class="rb-stat green"><div class="v" id="cnt-live">6</div><div class="l">Live / sent</div></div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+      <div class="seg">
+        <button class="on">All channels</button>
+        <button><span class="chic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>Outbound</button>
+        <button><span class="chic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 10v7M7 7v.01M12 17v-4M12 17v-4a2.5 2.5 0 0 1 5 0v4"/></svg></span>LinkedIn Posts</button>
+        <button><span class="chic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20"/></svg></span>Landing page</button>
+      </div>
+      <div class="spacer"></div>
+      <div class="legend">
+        <span><i class="lz out"></i> Outbound</span>
+        <span><i class="lz post"></i> Post</span>
+        <span><i class="lz land"></i> Landing</span>
+      </div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="board" id="board">
+      <!-- DRAFT -->
+      <div class="col draft">
+        <div class="col-h"><span class="t"><span class="led"></span>Draft</span><span class="ct">3</span></div>
+        <div class="cards" data-col="draft">
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #11 — Why the best US-entry plays start in the boardroom, not the booth" data-date="Drafting · for Jul 6" data-stat="draft" data-body="Most companies entering the US market lead with a booth at a trade show.&#10;&#10;The ones that actually win lead with a relationship.&#10;&#10;I've watched dozens of expansions over the years and the pattern is the same: the deals close in the room, not on the floor.&#10;&#10;A few thoughts on getting the room right →">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">for Jul 6</span></div>
+            <div class="c-title">Why US-entry plays start in the boardroom</div>
+            <div class="c-snip">Most companies entering the US lead with a booth at a trade show. The ones that win lead with a relationship…</div>
+            <div class="c-foot"><span class="statpill sp-draft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Drafting</span></div>
+          </div>
+
+          <div class="card chan-out" onclick="openDrawer(this)" data-chan="out" data-title="Follow-up nudge #2 — outbound LinkedIn" data-date="Draft · sequence step 3" data-stat="draft" data-body="Hi {{firstName}} — last note from me, promise.&#10;&#10;We're hosting a small, invite-only dinner for NYC tech leaders on Jul 21 — a dozen CTOs/CIOs, no vendors, no pitch. Just a sharp room talking about scaling engineering orgs into the US market.&#10;&#10;Adam's running a few intro calls this week to walk people through it. Worth 15 minutes?">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Outbound</span><span class="c-date">step 3</span></div>
+            <div class="c-title">Follow-up nudge #2 (LinkedIn)</div>
+            <div class="c-snip">Last note from me, promise. We're hosting a small, invite-only dinner for NYC tech leaders on Jul 21…</div>
+            <div class="c-foot"><span class="statpill sp-draft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Drafting</span></div>
+          </div>
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #12 — The dinner-table org chart" data-date="Drafting · for Jul 9" data-stat="draft" data-body="Outline only — needs a hook and a close.&#10;&#10;Theme: the people who actually unblock a US expansion aren't on the org chart you were handed. Map the real one.">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">for Jul 9</span></div>
+            <div class="c-title">The dinner-table org chart</div>
+            <div class="c-snip">Outline only — needs a hook and a close. Theme: the people who unblock a US expansion aren't on the chart…</div>
+            <div class="c-foot"><span class="statpill sp-draft"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>Drafting</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NEEDS REVIEW (emphasized) -->
+      <div class="col review">
+        <div class="col-h"><span class="t"><span class="led"></span>Needs your review</span><span class="ct" id="review-ct">5</span></div>
+        <div class="cards" data-col="review">
+
+          <div class="card chan-post attn" onclick="openDrawer(this)" data-chan="post" data-title="Post #10 — The dinner I wish I'd been invited to at 32" data-date="Ready · publishes Jul 2" data-stat="review" data-body="When I was 32, I'd have killed for a seat at the right table.&#10;&#10;Not a conference. Not a webinar. A dozen people who'd actually built the thing I was trying to build, in a room small enough to ask the dumb question.&#10;&#10;That's the room we're building on Jul 21 here in New York — for the CTOs and CIOs figuring out US-market scale.&#10;&#10;If that's you, the comments are open. (Or my DMs.)">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">publishes Jul 2</span></div>
+            <div class="c-title">The dinner I wish I'd been invited to at 32</div>
+            <div class="c-snip">When I was 32, I'd have killed for a seat at the right table. Not a conference. A dozen people who'd built…</div>
+            <div class="c-foot"><span class="statpill sp-review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Awaiting you</span><button class="approve" onclick="approve(event,this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+          </div>
+
+          <div class="card chan-out attn" onclick="openDrawer(this)" data-chan="out" data-title="Connection-request note — outbound LinkedIn" data-date="Ready · revised copy" data-stat="review" data-body="Hi {{firstName}} — I lead a small NYC group bringing tech leaders together around US-market growth. We're hosting an invite-only dinner on Jul 21 for a handful of CTOs/CIOs.&#10;&#10;Given your work at {{company}}, thought you'd fit the room. Would love to connect.">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Outbound</span><span class="c-date">revised</span></div>
+            <div class="c-title">Connection-request note</div>
+            <div class="c-snip">Hi {{firstName}} — I lead a small NYC group bringing tech leaders together around US-market growth…</div>
+            <div class="c-foot"><span class="statpill sp-review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Awaiting you</span><button class="approve" onclick="approve(event,this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+          </div>
+
+          <div class="card chan-land attn" onclick="openDrawer(this)" data-chan="land" data-title="Landing page — headline, subhead & CTA" data-date="Ready · v2 copy" data-stat="review" data-body="HEADLINE&#10;An invite-only table for the people scaling tech into the US.&#10;&#10;SUBHEAD&#10;On Jul 21 in New York, a dozen CTOs and CIOs sit down — no vendors, no pitch, no slides. Request your seat and Adam will walk you through it.&#10;&#10;CTA BUTTON&#10;Request a seat →&#10;&#10;FORM FIELDS&#10;Name · Work email · Company · Title">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20"/></svg>Landing</span><span class="c-date">v2 copy</span></div>
+            <div class="c-title">Landing headline, subhead &amp; CTA</div>
+            <div class="c-snip">"An invite-only table for the people scaling tech into the US." Subhead + Request a seat CTA…</div>
+            <div class="c-foot"><span class="statpill sp-review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Awaiting you</span><button class="approve" onclick="approve(event,this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+          </div>
+
+          <div class="card chan-out attn" onclick="openDrawer(this)" data-chan="out" data-title="Email nudge — unresponsive outbound leads" data-date="Ready · bulk sequence" data-stat="review" data-body="SUBJECT&#10;One seat left with your name on it, {{firstName}}?&#10;&#10;BODY&#10;Hi {{firstName}},&#10;&#10;We crossed paths on LinkedIn — I run a small dinner for NYC tech leaders and there's one on Jul 21 I think you'd get a lot out of. A dozen CTOs/CIOs, an honest conversation about scaling into the US, and a genuinely good meal.&#10;&#10;Adam's doing quick intro calls this week. Grab 15 minutes here: [calendly]&#10;&#10;— The SAWA team">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Outbound</span><span class="c-date">email</span></div>
+            <div class="c-title">Email nudge — unresponsive leads</div>
+            <div class="c-snip">Subject: "One seat left with your name on it?" Bulk follow-up for leads who haven't replied on LinkedIn…</div>
+            <div class="c-foot"><span class="statpill sp-review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Awaiting you</span><button class="approve" onclick="approve(event,this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+          </div>
+
+          <div class="card chan-land attn" onclick="openDrawer(this)" data-chan="land" data-title="Welcome email — inbound signups" data-date="Ready · auto-send on signup" data-stat="review" data-body="SUBJECT&#10;You're on the list — let's get you a seat.&#10;&#10;BODY&#10;Thanks for raising your hand.&#10;&#10;The Jul 21 dinner is small on purpose, so I like to spend 15 minutes with everyone before confirming a seat — make sure it's the right room for you, answer anything, and lock in the details.&#10;&#10;Here's my calendar — grab whatever works:&#10;[calendly link]&#10;&#10;Looking forward to it,&#10;Adam">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20"/></svg>Landing</span><span class="c-date">auto-send</span></div>
+            <div class="c-title">Welcome email — inbound signups</div>
+            <div class="c-snip">"You're on the list." Warm thanks + Calendly link sent automatically when someone signs up…</div>
+            <div class="c-foot"><span class="statpill sp-review"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Awaiting you</span><button class="approve" onclick="approve(event,this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve</button></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SCHEDULED / QUEUED -->
+      <div class="col sched">
+        <div class="col-h"><span class="t"><span class="led"></span>Scheduled / queued</span><span class="ct" id="sched-ct">3</span></div>
+        <div class="cards" data-col="sched">
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #9 — Three questions I ask before any US expansion" data-date="Scheduled · Jun 25, 8:30 AM" data-stat="sched" data-body="Before I tell a board &quot;go,&quot; I make them answer three questions.&#10;&#10;1. Who's the first hire — and is it a salesperson or an engineer?&#10;2. What breaks at 10x the support load?&#10;3. Who in-market already trusts you enough to make an intro?&#10;&#10;Most teams can't answer #3. That's usually the real gap.">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">Jun 25</span></div>
+            <div class="c-title">Three questions before any US expansion</div>
+            <div class="c-snip">Before I tell a board "go," I make them answer three questions. Most teams can't answer #3…</div>
+            <div class="c-foot"><span class="statpill sp-sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Jun 25, 8:30 AM</span></div>
+          </div>
+
+          <div class="card chan-out" onclick="openDrawer(this)" data-chan="out" data-title="Follow-up nudge #1 — outbound LinkedIn" data-date="Queued · sends on connect" data-stat="sched" data-body="Thanks for connecting, {{firstName}}.&#10;&#10;Quick reason I reached out: we're hosting an invite-only dinner on Jul 21 in NYC for a small group of CTOs/CIOs working on US-market growth. No agenda, no pitch — just a strong room.&#10;&#10;Adam's running short intro calls to share the details. Want me to send his calendar?">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Outbound</span><span class="c-date">on connect</span></div>
+            <div class="c-title">Follow-up nudge #1 (LinkedIn)</div>
+            <div class="c-snip">Thanks for connecting. Quick reason I reached out: an invite-only dinner on Jul 21 for CTOs/CIOs…</div>
+            <div class="c-foot"><span class="statpill sp-sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>On connect</span></div>
+          </div>
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #8 — The quiet cost of hiring your first US leader too late" data-date="Scheduled · Jun 27, 9:00 AM" data-stat="sched" data-body="The most expensive US-expansion mistake isn't a bad hire.&#10;&#10;It's waiting six months to make the first one.&#10;&#10;Here's the math on what that delay actually costs →">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">Jun 27</span></div>
+            <div class="c-title">The cost of your first US leader, too late</div>
+            <div class="c-snip">The most expensive US-expansion mistake isn't a bad hire. It's waiting six months to make the first one…</div>
+            <div class="c-foot"><span class="statpill sp-sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Jun 27, 9:00 AM</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- LIVE / SENT -->
+      <div class="col live">
+        <div class="col-h"><span class="t"><span class="led"></span>Live / sent</span><span class="ct" id="live-ct">6</span></div>
+        <div class="cards" data-col="live">
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #7 — What a closed dinner does that a conference never will" data-date="Live · Jun 13 · 47 reactions" data-stat="live" data-body="A conference gives you 500 business cards.&#10;&#10;A closed dinner gives you three relationships that actually change your year.&#10;&#10;I'll take the dinner every time. Here's why →">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">Jun 13</span></div>
+            <div class="c-title">What a closed dinner does that a conference won't</div>
+            <div class="c-snip">A conference gives you 500 business cards. A closed dinner gives you three relationships…</div>
+            <div class="c-foot"><span class="statpill sp-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>Live · 47 reactions</span></div>
+          </div>
+
+          <div class="card chan-out" onclick="openDrawer(this)" data-chan="out" data-title="Connection-request note — v1 (active)" data-date="Sent · 142 of 200 sent" data-stat="live" data-body="Hi {{firstName}} — I run a small NYC circle of tech leaders focused on US-market growth, and we're hosting an invite-only dinner on Jul 21. Given your work at {{company}}, I'd love to have you in the room. Open to connecting?">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Outbound</span><span class="c-date">142/200</span></div>
+            <div class="c-title">Connection-request note (active)</div>
+            <div class="c-snip">Hi {{firstName}} — I run a small NYC circle of tech leaders focused on US-market growth…</div>
+            <div class="c-foot"><span class="statpill sp-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>Sent · 142/200</span></div>
+          </div>
+
+          <div class="card chan-land" onclick="openDrawer(this)" data-chan="land" data-title="Landing page — v1 (currently published)" data-date="Live · 23 signups" data-stat="live" data-body="HEADLINE&#10;The room where US expansion actually happens.&#10;&#10;SUBHEAD&#10;Jul 21, New York. A private dinner for CTOs and CIOs. Request a seat below.&#10;&#10;CTA&#10;Request my seat">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20"/></svg>Landing</span><span class="c-date">23 signups</span></div>
+            <div class="c-title">Landing page v1 (published)</div>
+            <div class="c-snip">"The room where US expansion actually happens." Currently live — 23 signups to date…</div>
+            <div class="c-foot"><span class="statpill sp-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>Live · 23 signups</span></div>
+          </div>
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #6 — The CTOs who scale fastest all do this one thing" data-date="Live · Jun 11 · 61 reactions" data-stat="live" data-body="The CTOs who scale into the US fastest all do one unglamorous thing:&#10;&#10;They build relationships 12 months before they need them.&#10;&#10;A short story about the best one I ever saw →">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">Jun 11</span></div>
+            <div class="c-title">The one thing fast-scaling CTOs all do</div>
+            <div class="c-snip">They build relationships 12 months before they need them. A short story about the best one I saw…</div>
+            <div class="c-foot"><span class="statpill sp-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>Live · 61 reactions</span></div>
+          </div>
+
+          <div class="card chan-out" onclick="openDrawer(this)" data-chan="out" data-title="Welcome email v1 — inbound (active)" data-date="Sent · 23 delivered" data-stat="live" data-body="SUBJECT&#10;Thanks for signing up — next step inside&#10;&#10;BODY&#10;Great to have you. Grab 15 minutes with Adam to confirm your seat for Jul 21: [calendly]">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>Outbound</span><span class="c-date">23 sent</span></div>
+            <div class="c-title">Welcome email v1 (active)</div>
+            <div class="c-snip">"Thanks for signing up — next step inside." Auto-sends Adam's Calendly to new inbound signups…</div>
+            <div class="c-foot"><span class="statpill sp-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>Sent · 23 delivered</span></div>
+          </div>
+
+          <div class="card chan-post" onclick="openDrawer(this)" data-chan="post" data-title="Post #5 — Announcing: a dinner for NYC tech leaders" data-date="Live · Jun 9 · 88 reactions" data-stat="live" data-body="I'm hosting something I've wanted to do for years.&#10;&#10;On Jul 21, a dozen CTOs and CIOs in New York, one table, one honest conversation about building in the US.&#10;&#10;If that's a room you'd want to be in, let's talk.">
+            <div class="c-top"><span class="chanlab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/></svg>Post</span><span class="c-date">Jun 9</span></div>
+            <div class="c-title">Announcing: a dinner for NYC tech leaders</div>
+            <div class="c-snip">I'm hosting something I've wanted to do for years. On Jul 21, a dozen CTOs and CIOs in New York…</div>
+            <div class="c-foot"><span class="statpill sp-live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>Live · 88 reactions</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- DRAWER -->
+<div class="backdrop" id="backdrop" onclick="if(event.target===this)closeDrawer()">
+  <div class="drawer">
+    <div class="dh">
+      <div>
+        <span class="chanlab" id="d-chan"></span>
+        <div class="dtitle" id="d-title"></div>
+        <div class="dmeta"><span id="d-meta"></span></div>
+      </div>
+      <button class="x" onclick="closeDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="dbody">
+      <div class="field-lbl">Copy <span class="edithint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg> Editable</span></div>
+      <textarea class="post-text" id="d-body"></textarea>
+      <div class="metarow">
+        <div class="metabox"><div class="l">Channel</div><div class="v" id="d-channel"></div></div>
+        <div class="metabox"><div class="l">Status</div><div class="v" id="d-status"></div></div>
+      </div>
+    </div>
+    <div class="df">
+      <span class="pmeta" id="d-foot-note"></span>
+      <button class="pbtn" onclick="closeDrawer()">Close</button>
+      <button class="pbtn primary" id="d-approve"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Approve &amp; queue</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg">Approved</span></div>
+
+<script>
+var CH={out:'Outbound message',post:'LinkedIn post',land:'Landing page'};
+var ST={draft:'Draft',review:'Needs your review',sched:'Scheduled / queued',live:'Live / sent'};
+var current=null;
+
+function openDrawer(el){
+  current=el;
+  document.getElementById('d-title').textContent=el.dataset.title;
+  document.getElementById('d-meta').textContent=el.dataset.date;
+  document.getElementById('d-body').value=el.dataset.body.replace(/&#10;/g,'\n');
+  document.getElementById('d-channel').textContent=CH[el.dataset.chan];
+  document.getElementById('d-status').textContent=ST[el.dataset.stat];
+  var chan=document.getElementById('d-chan');
+  chan.innerHTML=el.querySelector('.chanlab').innerHTML;
+  var ap=document.getElementById('d-approve');
+  var note=document.getElementById('d-foot-note');
+  if(el.dataset.stat==='review'){ap.style.display='';note.textContent='Approving moves this to Scheduled.';}
+  else{ap.style.display='none';note.textContent=el.dataset.stat==='draft'?'Still drafting — not yet up for review.':'';}
+  ap.onclick=function(){var btn=current.querySelector('.approve');closeDrawer();if(btn)doApprove(btn);};
+  document.getElementById('backdrop').classList.add('open');
+}
+function closeDrawer(){document.getElementById('backdrop').classList.remove('open');current=null;}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+
+function approve(e,btn){e.stopPropagation();doApprove(btn);}
+
+function doApprove(btn){
+  var card=btn.closest('.card');
+  btn.classList.add('gone');
+  setTimeout(function(){
+    // strip review styling, change pill to scheduled, move to scheduled column
+    card.classList.remove('attn');
+    var pill=card.querySelector('.statpill');
+    pill.className='statpill sp-sched';
+    pill.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Queued';
+    btn.remove();
+    var schedCol=document.querySelector('[data-col="sched"]');
+    card.style.animation='none';
+    schedCol.insertBefore(card,schedCol.firstChild);
+    card.style.animation='pop .35s ease both';
+    recount();
+    showToast('Approved — moved to Scheduled');
+  },200);
+}
+
+function recount(){
+  var r=document.querySelectorAll('[data-col="review"] .card').length;
+  var s=document.querySelectorAll('[data-col="sched"] .card').length;
+  document.getElementById('review-ct').textContent=r;
+  document.getElementById('sched-ct').textContent=s;
+  document.getElementById('cnt-review').textContent=r;
+  document.getElementById('cnt-sched').textContent=s;
+  var banner=document.querySelector('.rb-txt b');
+  if(r===0){banner.innerHTML='<span class="big" style="color:var(--green)">All clear</span> — nothing waiting on you';}
+  else{banner.innerHTML='<span class="big">'+r+' artefact'+(r>1?'s are':' is')+'</span> waiting on your approval';}
+}
+
+var toastT;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(function(){t.classList.remove('show');},2200);
+}
+
+// channel filter
+document.querySelectorAll('.seg button').forEach(function(b,i){
+  b.onclick=function(){
+    document.querySelectorAll('.seg button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');
+    var map=['all','out','post','land'];
+    var f=map[i];
+    document.querySelectorAll('.card').forEach(function(c){
+      c.style.display=(f==='all'||c.dataset.chan===f)?'':'none';
+    });
+  };
+});
+</script>
+</body>
+</html>
