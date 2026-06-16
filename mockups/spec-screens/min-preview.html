@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Overview (Minimal Dark)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A; --side:#000000; --surface:#141414; --hover:#1A1A1A;
+    --hair:#1F1F1F; --border:#2A2A2A;
+    --text:#FAFAFA; --muted:#A1A1A1; --faint:#6E6E6E;
+    --green:#3ECF8E; --green-soft:rgba(62,207,142,.12);
+    --amber:#E5A33D; --amber-soft:rgba(229,163,61,.12);
+    --red:#F87171; --red-soft:rgba(248,113,113,.12);
+    --sans:'Geist',-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:'Geist Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5;font-size:14px}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+
+  /* sidebar */
+  .side{background:var(--side);border-right:1px solid var(--hair);padding:18px 14px;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px}
+  .brand .av{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#A855F7,#D946EF);display:grid;place-items:center;font-weight:600;font-size:13px;color:#fff;flex-shrink:0}
+  .brand .nm{font-weight:500;font-size:14px}
+  .brand .chev{margin-left:auto;color:var(--faint);font-size:12px}
+  .nav{display:flex;flex-direction:column;gap:1px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:7px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:400;cursor:pointer}
+  .nav a .ic{width:16px;height:16px;opacity:.8;stroke:currentColor;fill:none;stroke-width:1.6}
+  .nav a.active{background:var(--surface);color:var(--text)}
+  .nav a:hover:not(.active){color:var(--text)}
+  .side .foot{margin-top:auto;display:flex;align-items:center;gap:9px;padding:10px 8px;border-top:1px solid var(--hair);color:var(--muted);font-size:12.5px}
+  .side .foot .av{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#A855F7,#D946EF);flex-shrink:0}
+
+  /* topbar */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{display:flex;align-items:center;justify-content:flex-end;gap:20px;padding:14px 32px;border-bottom:1px solid var(--hair)}
+  .topbar a{color:var(--muted);text-decoration:none;font-size:13px}
+  .topbar a:hover{color:var(--text)}
+  .topbar .fb{border:1px solid var(--border);border-radius:7px;padding:6px 12px;display:flex;align-items:center;gap:7px}
+  .topbar .fb kbd{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:0 5px;font-size:11px;font-family:var(--mono)}
+
+  .content{padding:30px 32px 60px;max-width:1180px}
+  h1{font-size:28px;font-weight:600;letter-spacing:-.01em}
+  .crumb{color:var(--faint);font-size:13px;margin-top:4px}
+
+  /* stat row */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:28px;align-items:end;margin:28px 0 26px}
+  .stat .lbl{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  .stat .val{font-size:30px;font-weight:500;margin-top:8px;letter-spacing:-.01em}
+  .stat .val.green{color:var(--green)}
+  .stat .val small{color:var(--faint);font-size:18px}
+  .spark{width:150px;height:46px}
+
+  /* section header */
+  .sec{margin-top:8px}
+  .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .sec-h .t{font-size:15px;font-weight:500}
+  .sec-h .t .n{color:var(--faint);font-weight:400;margin-left:8px}
+  .btn-w{background:#fff;color:#0A0A0A;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer}
+
+  /* table */
+  .tbl{border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:var(--bg)}
+  .tr{display:grid;grid-template-columns:1fr 90px 130px 110px 40px;align-items:center;padding:0 16px;height:56px;border-bottom:1px solid var(--hair)}
+  .tr:last-child{border-bottom:none}
+  .tr.head{height:42px;background:transparent}
+  .tr.head span{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .tr.row:hover{background:var(--surface)}
+  .who{display:flex;align-items:center;gap:12px;min-width:0}
+  .who .av{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;font-size:12px;color:var(--muted);flex-shrink:0}
+  .who .nm{font-size:14px;font-weight:500}
+  .who .ro{font-size:12.5px;color:var(--muted)}
+  .chan{font-size:11px;color:var(--muted);border:1px solid var(--hair);border-radius:6px;padding:3px 9px;justify-self:start}
+  .pill{font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;justify-self:start}
+  .pill.wait{background:var(--amber-soft);color:var(--amber)}
+  .pill.booked{background:var(--green-soft);color:var(--green)}
+  .added{font-size:12.5px;color:var(--muted)}
+  .dots{color:var(--faint);justify-self:end;cursor:pointer}
+
+  /* two-up */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:34px}
+  .mrow{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:12px;height:52px;border-bottom:1px solid var(--hair);padding:0 4px}
+  .mrow:last-child{border-bottom:none}
+  .mrow .d{font-size:12.5px;color:var(--faint);font-family:var(--mono)}
+  .mrow .nm{font-size:13.5px;font-weight:500}
+  .mrow .nm small{display:block;color:var(--muted);font-size:12px;font-weight:400}
+  .mrow .tm{font-size:13px;color:var(--green);font-family:var(--mono)}
+  .acard{padding:13px 0;border-bottom:1px solid var(--hair)}
+  .acard:last-child{border-bottom:none}
+  .acard .d{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .acard p{font-size:13.5px;color:var(--text);margin:6px 0 8px;line-height:1.4}
+  .acard .tag{font-size:11px;font-weight:500;padding:2px 9px;border-radius:6px;background:var(--amber-soft);color:var(--amber)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="av">S</span><span class="nm">SAWA Command</span><span class="chev">⌄</span></div>
+    <nav class="nav">
+      <a class="active"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12h7V3H3zM14 21h7v-9h-7zM14 3v6h7V3zM3 21h7v-6H3z"/></svg> Overview</a>
+      <a><svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg> Lead Pipeline</a>
+      <a><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Meetings</a>
+      <a><svg class="ic" viewBox="0 0 24 24"><path d="M4 4h16v16H4z M8 9h8 M8 13h6"/></svg> Artefacts</a>
+    </nav>
+    <div class="foot"><span class="av"></span> refero.design.team</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="fb">💬 Feedback <kbd>F</kbd></span>
+      <a>Help</a><a>Docs</a>
+    </div>
+
+    <div class="content">
+      <h1>Overview</h1>
+      <div class="crumb">NY CTO Dinner · 35 days to Jul 21</div>
+
+      <!-- STATS -->
+      <div class="stats">
+        <div class="stat"><div class="lbl">Contacted</div><div class="val">212</div></div>
+        <div class="stat"><div class="lbl">Connected</div><div class="val">124</div></div>
+        <div class="stat"><div class="lbl">Replied</div><div class="val">69</div></div>
+        <div class="stat"><div class="lbl">Booked</div><div class="val green">23<small> / 50</small></div></div>
+        <svg class="spark" viewBox="0 0 150 46" preserveAspectRatio="none">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3ECF8E" stop-opacity=".35"/><stop offset="1" stop-color="#3ECF8E" stop-opacity="0"/>
+          </linearGradient></defs>
+          <path d="M0 40 L30 36 L60 30 L90 24 L120 14 L150 4 L150 46 L0 46 Z" fill="url(#g)"/>
+          <path d="M0 40 L30 36 L60 30 L90 24 L120 14 L150 4" fill="none" stroke="#3ECF8E" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <!-- WAITING ON YOU TABLE -->
+      <section class="sec">
+        <div class="sec-h">
+          <div class="t">Waiting on you <span class="n">4 · replied, not yet booked</span></div>
+          <button class="btn-g">Export</button>
+        </div>
+        <div class="tbl">
+          <div class="tr head"><span>Lead</span><span>Channel</span><span>Status</span><span>Replied</span><span></span></div>
+          <div class="tr row"><div class="who"><span class="av">DC</span><div><div class="nm">Derek Cho</div><div class="ro">CTO · Northwind Logistics</div></div></div><span class="chan">OUT</span><span class="pill wait">Waiting</span><span class="added">12m ago</span><span class="dots">···</span></div>
+          <div class="tr row"><div class="who"><span class="av">AP</span><div><div class="nm">Anita Patel</div><div class="ro">CIO · Meridian Bank</div></div></div><span class="chan">IN</span><span class="pill wait">Waiting</span><span class="added">40m ago</span><span class="dots">···</span></div>
+          <div class="tr row"><div class="who"><span class="av">TW</span><div><div class="nm">Thomas Wells</div><div class="ro">CTO · Halcyon Media</div></div></div><span class="chan">OUT</span><span class="pill wait">Waiting</span><span class="added">2h ago</span><span class="dots">···</span></div>
+          <div class="tr row"><div class="who"><span class="av">CM</span><div><div class="nm">Carla Mendes</div><div class="ro">CIO · Vela Energy</div></div></div><span class="chan">IN</span><span class="pill wait">Waiting</span><span class="added">5h ago</span><span class="dots">···</span></div>
+        </div>
+      </section>
+
+      <!-- TWO-UP -->
+      <div class="grid2">
+        <section>
+          <div class="sec-h"><div class="t">Next meetings</div></div>
+          <div>
+            <div class="mrow"><span class="d">Jun 17</span><span class="nm">Rajesh Kumar<small>Vantage Health · out</small></span><span class="tm">10:30</span></div>
+            <div class="mrow"><span class="d">Jun 17</span><span class="nm">Sofia Marchetti<small>Brightline · in</small></span><span class="tm">14:00</span></div>
+            <div class="mrow"><span class="d">Jun 18</span><span class="nm">Derek Cho<small>Northwind · out</small></span><span class="tm">09:15</span></div>
+            <div class="mrow"><span class="d">Jun 19</span><span class="nm">Anita Patel<small>Meridian · in</small></span><span class="tm">11:00</span></div>
+          </div>
+        </section>
+        <section>
+          <div class="sec-h"><div class="t">This week's artefacts <span class="n">LinkedIn · 3×/week</span></div></div>
+          <div>
+            <div class="acard"><div class="d">Mon · Jun 22</div><p>"In 2026, product discovery happens inside AI search before a buyer reaches your site."</p><span class="tag">Draft · needs review</span></div>
+            <div class="acard"><div class="d">Wed · Jun 24</div><p>"Traffic from AI tools grew 693% last year. Mind-blowing, right?"</p><span class="tag">Draft · needs review</span></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
