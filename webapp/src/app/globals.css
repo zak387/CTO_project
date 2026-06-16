@@ -152,25 +152,17 @@ h1{font-size:21px;letter-spacing:-.4px}
 .psum::before{content:"▸ ";color:var(--muted)}
 details[open] .psum::before{content:"▾ "}
 
-/* artefacts: list of expandable cards — click a card to edit/approve in place */
-.alist{display:flex;flex-direction:column;gap:10px}
-.acard2{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;transition:border-color .12s}
-.acard2.open{border-color:var(--accent)}
-.acard2.draft{border-left:3px solid #e2c98c}
-.acard2-head{display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer}
-.acard2-head:hover{background:#fafaff}
-.acard2-date{width:42px;text-align:center;flex-shrink:0}
-.acard2-date b{display:block;font-size:17px;line-height:1}
-.acard2-date span{font-size:10px;color:var(--muted);text-transform:uppercase}
-.acard2-hook{flex:1;min-width:0;font-size:14px;font-weight:600}
-.acard2-prev{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.appok{color:var(--green);font-weight:800}
-.chev{color:var(--muted);font-size:13px;width:14px;text-align:center}
-.acard2-body{padding:0 16px 16px;animation:fadeIn .18s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.acard2-actions{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
-.acard2-status{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
-.acard2 .ptext{margin-top:4px;min-height:150px;max-width:680px}
+/* artefacts: full-width reader below the calendar (no pop-up) */
+.postreader{margin-top:18px;padding:20px;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.prhead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.prtitle{font-size:19px;margin:8px 0 4px;letter-spacing:-.2px}
+.prmeta{font-size:12.5px;color:var(--muted)}
+.prcount{color:var(--muted)}
+.appok{color:var(--green);font-weight:700;margin-left:10px}
+.artbody{font-size:14px;line-height:1.65;color:#33405a;background:#fdfcfa;border:1px solid var(--line);border-radius:10px;padding:16px;white-space:pre-wrap;max-width:680px}
+.prfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.prnav{display:flex;gap:8px}
 
 /* artefacts grid */
 .agrid{display:grid;grid-template-columns:64px 1fr 1fr 1fr;gap:10px}
