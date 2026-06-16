@@ -47,7 +47,7 @@ export default function Briefing() {
 
       {/* HERO */}
       <section className="card hero">
-        <h2>⚑ Waiting on you <span className="cnt">{waiting.length}</span></h2>
+        <h2><span>⚑ Waiting on you <span className="tag">— they replied on LinkedIn and are waiting for you to message them back</span></span> <span className="cnt">{waiting.length}</span></h2>
         {waiting.length === 0 ? (
           <div className="empty">All caught up — nobody&apos;s waiting. 🎉</div>
         ) : (
