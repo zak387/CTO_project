@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Proposal B · The Pipeline Board</title>
+<style>
+  :root{
+    --bg:#0e1320; --panel:#161d2e; --panel2:#1c2536; --ink:#eef2f9; --muted:#8b97ad; --line:#27314650;
+    --accent:#22d3ee; --accent2:#6366f1; --green:#34d399; --amber:#fbbf24; --rose:#fb7185;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  /* top bar */
+  .topbar{display:flex;align-items:center;gap:24px;padding:14px 26px;background:#0b101b;border-bottom:1px solid #1e2740;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#22d3ee,#6366f1);display:grid;place-items:center;color:#0b101b;font-size:14px}
+  .brand small{color:#6b7791;font-weight:500;font-size:11px;display:block}
+  .tabs{display:flex;gap:4px;margin-left:8px}
+  .tabs a{padding:8px 15px;border-radius:9px;color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600}
+  .tabs a.active{background:var(--panel2);color:#fff}
+  .tabs a:hover:not(.active){color:#fff}
+  .topbar .right{margin-left:auto;display:flex;align-items:center;gap:16px}
+  .sync{display:flex;align-items:center;gap:7px;font-size:12px;color:#7fe7c4}
+  .pulse{width:7px;height:7px;border-radius:50%;background:#34d399;animation:p 2s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(52,211,153,.5)}70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+  .cd{font-size:12px;color:var(--muted)} .cd b{color:var(--accent)}
+  /* controls */
+  .wrap{padding:20px 26px 60px}
+  .ctrl{display:flex;align-items:center;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+  h1{font-size:19px;letter-spacing:-.3px}
+  .seg{display:flex;background:var(--panel);border:1px solid #273146;border-radius:10px;padding:3px}
+  .seg button{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .seg button.on{background:var(--accent2);color:#fff}
+  .seg .sq{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .mini{margin-left:auto;display:flex;gap:10px}
+  .stat{background:var(--panel);border:1px solid #273146;border-radius:10px;padding:8px 14px;text-align:center}
+  .stat b{font-size:17px;display:block;line-height:1.1}.stat span{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  /* board */
+  .board{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:start}
+  .col{background:var(--panel);border:1px solid #232c40;border-radius:var(--radius);min-height:200px}
+  .col-h{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 10px;border-bottom:1px solid #232c40}
+  .col-h .t{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .col-h .ct{font-size:11px;color:var(--muted);background:#0e1320;border-radius:20px;padding:2px 8px;font-weight:700}
+  .col-h .led{width:7px;height:7px;border-radius:50%}
+  .cards{padding:10px;display:flex;flex-direction:column;gap:9px}
+  .lc{background:var(--panel2);border:1px solid #2a344b;border-radius:11px;padding:11px;cursor:pointer;transition:.12s}
+  .lc:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .lc .nm{font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+  .lc .ro{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .lc .ft{display:flex;align-items:center;gap:7px;margin-top:9px}
+  .src{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:.3px}
+  .src.out{background:rgba(99,102,241,.18);color:#a5b4fc}
+  .src.in{background:rgba(52,211,153,.16);color:#6ee7b7}
+  .lc .ago{font-size:10.5px;color:#5f6b82;margin-left:auto}
+  .av{width:24px;height:24px;border-radius:7px;background:#0e1320;color:var(--accent);display:grid;place-items:center;font-size:10px;font-weight:700}
+  .hot{width:7px;height:7px;border-radius:50%;background:var(--rose);box-shadow:0 0 7px var(--rose)}
+  .add{font-size:11.5px;color:#5f6b82;text-align:center;padding:9px;cursor:pointer}
+  /* note strip */
+  .note{margin-top:20px;background:linear-gradient(100deg,rgba(99,102,241,.12),rgba(34,211,238,.08));border:1px solid #2c3a59;border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:12px;font-size:13px;color:#c7d2e8}
+  .note b{color:#fff}
+  @media(max-width:1100px){.board{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:680px){.board{grid-template-columns:1fr}.tabs{display:none}.mini{width:100%;justify-content:space-between;margin-left:0}}
+</style>
+</head>
+<body>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="tabs">
+      <a>Overview</a>
+      <a class="active">Pipeline</a>
+      <a>Artefacts</a>
+      <a>Meetings</a>
+    </nav>
+    <div class="right">
+      <span class="cd">Dinner in <b>94 days</b> · Sep 18</span>
+      <span class="sync"><span class="pulse"></span> Live</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- CONTROLS -->
+    <div class="ctrl">
+      <h1>Lead Pipeline</h1>
+      <div class="seg">
+        <button class="on">All channels</button>
+        <button><span class="sq" style="background:#6366f1"></span> Outbound</button>
+        <button><span class="sq" style="background:#34d399"></span> Inbound</button>
+      </div>
+      <div class="mini">
+        <div class="stat"><b>200</b><span>Targets</span></div>
+        <div class="stat"><b>41</b><span>Replied</span></div>
+        <div class="stat" style="border-color:#3b82f6"><b style="color:#22d3ee">21</b><span>Booked</span></div>
+      </div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="board">
+      <!-- col 1 -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#64748b"></span> Connection Sent</div><span class="ct">88</span></div>
+        <div class="cards">
+          <div class="lc"><div class="nm">Marcus Feld <span class="av">MF</span></div><div class="ro">CTO · Tessellate AI</div><div class="ft"><span class="src out">OUT</span><span class="ago">3h ago</span></div></div>
+          <div class="lc"><div class="nm">Priya Nair <span class="av">PN</span></div><div class="ro">CIO · Solstice Group</div><div class="ft"><span class="src out">OUT</span><span class="ago">5h ago</span></div></div>
+          <div class="lc"><div class="nm">Hiro Tanaka <span class="av">HT</span></div><div class="ro">CTO · Kanso Robotics</div><div class="ft"><span class="src out">OUT</span><span class="ago">1d ago</span></div></div>
+          <div class="add">+ 85 more</div>
+        </div>
+      </div>
+      <!-- col 2 -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#fbbf24"></span> Connected</div><span class="ct">55</span></div>
+        <div class="cards">
+          <div class="lc"><div class="nm">Lena Gruber <span class="av">LG</span></div><div class="ro">CIO · Apex Manufacturing</div><div class="ft"><span class="src out">OUT</span><span class="ago">2h ago</span></div></div>
+          <div class="lc"><div class="nm">Owen Brady <span class="av">OB</span></div><div class="ro">CTO · Linnet Fintech</div><div class="ft"><span class="src out">OUT</span><span class="ago">6h ago</span></div></div>
+          <div class="add">+ 53 more</div>
+        </div>
+      </div>
+      <!-- col 3 -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#34d399"></span> Replied / Signed up</div><span class="ct">69</span></div>
+        <div class="cards">
+          <div class="lc"><div class="nm">Thomas Wells <span class="hot" title="needs Adam"></span></div><div class="ro">CTO · Halcyon Media</div><div class="ft"><span class="src out">OUT</span><span class="ago">12m ago</span></div></div>
+          <div class="lc"><div class="nm">Anita Patel <span class="hot"></span></div><div class="ro">CIO · Meridian Bank</div><div class="ft"><span class="src in">IN</span><span class="ago">40m ago</span></div></div>
+          <div class="lc"><div class="nm">Sofia Marchetti</div><div class="ro">CIO · Brightline Retail</div><div class="ft"><span class="src in">IN</span><span class="ago">2h ago</span></div></div>
+          <div class="add">+ 66 more</div>
+        </div>
+      </div>
+      <!-- col 4 -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#a78bfa"></span> Adam Handling</div><span class="ct">15</span></div>
+        <div class="cards">
+          <div class="lc"><div class="nm">Derek Cho <span class="av">DC</span></div><div class="ro">CTO · Northwind Logistics</div><div class="ft"><span class="src out">OUT</span><span class="ago">in convo</span></div></div>
+          <div class="lc"><div class="nm">Carla Mendes <span class="av">CM</span></div><div class="ro">CIO · Vela Energy</div><div class="ft"><span class="src in">IN</span><span class="ago">in convo</span></div></div>
+          <div class="add">+ 13 more</div>
+        </div>
+      </div>
+      <!-- col 5 -->
+      <div class="col" style="border-color:#1e6e6a">
+        <div class="col-h"><div class="t"><span class="led" style="background:#22d3ee"></span> Meeting Booked</div><span class="ct" style="background:#0c2d2c;color:#5eead4">21</span></div>
+        <div class="cards">
+          <div class="lc" style="border-color:#1e6e6a"><div class="nm">Rajesh Kumar <span class="av">RK</span></div><div class="ro">CTO · Vantage Health</div><div class="ft"><span class="src out">OUT</span><span class="ago">Jun 17</span></div></div>
+          <div class="lc" style="border-color:#1e6e6a"><div class="nm">Sofia Marchetti <span class="av">SM</span></div><div class="ro">CIO · Brightline</div><div class="ft"><span class="src in">IN</span><span class="ago">Jun 17</span></div></div>
+          <div class="add">+ 19 more</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">⚡ <span><b>Auto-handoff rule active:</b> when a lead replies on LinkedIn (Dripify) they move to <b>Adam Handling</b> and are pulled from the email follow-up sequence automatically.</span></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Meetings</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#0f1729; --muted:#5b6678; --line:#e6e9ef;
+    --accent:#4f46e5; --accent-soft:#eef0fe; --green:#0f9d6e;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06); --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  /* sidebar */
+  .side{background:#0f1729;color:#cdd5e3;padding:22px 16px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center;font-size:13px}
+  .brand small{display:block;font-weight:500;color:#7b88a1;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#aab4c8;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+  .nav a.active{background:rgba(99,102,241,.16);color:#fff}
+  .nav a:hover:not(.active){background:rgba(255,255,255,.05);color:#fff}
+  .nav .ic{width:17px;text-align:center}
+  /* main */
+  .main{padding:24px 30px 60px;max-width:760px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  h1{font-size:21px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .card h2{font-size:14px;padding:15px 18px 11px;display:flex;align-items:center;gap:4px}
+  .cnt{background:var(--accent);color:#fff;font-size:12px;font-weight:700;border-radius:20px;padding:1px 9px;margin-left:6px}
+  .cnt.muted{background:#aab4c8}
+  /* day group */
+  .day{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+    background:var(--bg);padding:7px 18px;border-top:1px solid var(--line)}
+  .card h2 + .day{border-top:none}
+  /* meeting row */
+  .row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid var(--line)}
+  .row:hover{background:#fafaff;cursor:pointer}
+  .time{width:52px;flex-shrink:0;font-size:13.5px;font-weight:700;color:var(--accent);text-align:center}
+  .who{flex:1;min-width:0}
+  .wname{font-size:14.5px;font-weight:600;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .wname:hover{color:var(--accent);text-decoration:underline}
+  .wname .ext{font-size:11px;opacity:.6}
+  .role{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .pill{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0}
+  .pill.out{background:#eef0fe;color:#4f46e5}.pill.in{background:#e6f7f0;color:#0f9d6e}
+  /* past section */
+  details.past{margin-top:18px}
+  details.past summary{list-style:none;cursor:pointer}
+  details.past summary::-webkit-details-marker{display:none}
+  details.past summary h2{cursor:pointer}
+  .chev{margin-left:auto;color:var(--muted);font-size:12px;transition:transform .15s}
+  details[open] .chev{transform:rotate(90deg)}
+  .row.muted .time,.row.muted .wname,.row.muted .role{color:var(--muted)}
+  .row.cancelled .wname{text-decoration:line-through;color:#9aa3b2}
+  .tag-cancel{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fdeaea;color:#d04545;flex-shrink:0}
+  /* empty state (hidden demo) */
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px}
+    .nav{flex-direction:row;flex-wrap:wrap;margin-top:0;gap:4px}
+    .main{padding:18px 16px 50px;max-width:none}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="nav">
+      <a><span class="ic">▣</span> Briefing</a>
+      <a><span class="ic">⇅</span> Lead Pipeline</a>
+      <a class="active"><span class="ic">◷</span> Meetings</a>
+      <a><span class="ic">✎</span> Artefacts</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1>Meetings</h1><div class="sub">Booked calls with Adam — nothing else.</div></div>
+    </div>
+
+    <!-- UPCOMING -->
+    <section class="card">
+      <h2>Upcoming <span class="cnt">5</span></h2>
+
+      <div class="day">Tue · Jul 17</div>
+      <div class="row">
+        <div class="time">10:30</div>
+        <div class="who"><a class="wname" href="#">Rajesh Kumar <span class="ext">↗</span></a><div class="role">CTO · Acme Cloud</div></div>
+        <span class="pill out">OUT</span>
+      </div>
+      <div class="row">
+        <div class="time">14:00</div>
+        <div class="who"><a class="wname" href="#">Sofia Marlow <span class="ext">↗</span></a><div class="role">CIO · Beacon Health</div></div>
+        <span class="pill in">IN</span>
+      </div>
+
+      <div class="day">Wed · Jul 18</div>
+      <div class="row">
+        <div class="time">09:15</div>
+        <div class="who"><a class="wname" href="#">Derek Cho <span class="ext">↗</span></a><div class="role">CTO · Northwind Logistics</div></div>
+        <span class="pill out">OUT</span>
+      </div>
+      <div class="row">
+        <div class="time">11:00</div>
+        <div class="who"><a class="wname" href="#">Anita Patel <span class="ext">↗</span></a><div class="role">CIO · Meridian Bank</div></div>
+        <span class="pill in">IN</span>
+      </div>
+
+      <div class="day">Fri · Jul 20</div>
+      <div class="row">
+        <div class="time">15:30</div>
+        <div class="who"><a class="wname" href="#">Marcus Vale <span class="ext">↗</span></a><div class="role">CTO · Halcyon Media</div></div>
+        <span class="pill out">OUT</span>
+      </div>
+    </section>
+
+    <!-- PAST (collapsed by default) -->
+    <details class="past card">
+      <summary>
+        <h2>Past <span class="cnt muted">18</span><span class="chev">▶</span></h2>
+      </summary>
+
+      <div class="day">Mon · Jul 14</div>
+      <div class="row muted">
+        <div class="time">11:00</div>
+        <div class="who"><a class="wname" href="#">Priya Nair <span class="ext">↗</span></a><div class="role">CIO · Vela Energy</div></div>
+        <span class="pill in">IN</span>
+      </div>
+      <div class="row muted cancelled">
+        <div class="time">15:30</div>
+        <div class="who"><a class="wname" href="#">Tom Wells <span class="ext">↗</span></a><div class="role">CTO · Brightline</div></div>
+        <span class="tag-cancel">CANCELLED</span>
+        <span class="pill out">OUT</span>
+      </div>
+
+      <div class="day">Fri · Jul 11</div>
+      <div class="row muted">
+        <div class="time">10:00</div>
+        <div class="who"><a class="wname" href="#">Elena Sousa <span class="ext">↗</span></a><div class="role">CTO · Vantage Health</div></div>
+        <span class="pill out">OUT</span>
+      </div>
+    </details>
+  </main>
+</div>
+</body>
+</html>

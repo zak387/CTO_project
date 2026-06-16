@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# next.js
+**/.next/
+**/out/
+**/.turbo/
+next-env.d.ts
+
+# env / secrets
+.env
+.env*.local
+**/.env
+**/.env*.local
+
+# local SQLite database (recreated via seed)
+*.db
+*.db-journal
+*.sqlite
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# build output
+dist/
+build/
+
+# third-party skill asset (has its own git repo)
+transitions.dev/
+
+# skill working state (not project files)
+.superpowers/
+.claude/

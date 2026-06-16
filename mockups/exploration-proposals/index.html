@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command Center — Architecture Proposals</title>
+<style>
+  :root{--bg:#0f1117;--panel:#181b24;--ink:#eef1f7;--muted:#9aa3b5;--line:#262b38;--accent:#6366f1;--radius:16px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.55}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 24px 80px}
+  .kick{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:34px;letter-spacing:-.8px;margin:10px 0 8px}
+  .lede{color:var(--muted);font-size:15px;max-width:660px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:.15s}
+  .card:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .pa{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.5px}
+  .card h2{font-size:19px;margin:8px 0 4px;letter-spacing:-.3px}
+  .card .one{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:12px}
+  .card p{font-size:13px;color:#c2c9d6;line-height:1.55;flex:1}
+  .meta{margin-top:16px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+  .meta b{color:var(--ink)}
+  .open{margin-top:14px;font-size:13px;font-weight:700;color:var(--accent)}
+  .thumb{height:90px;border-radius:10px;margin-bottom:16px;border:1px solid var(--line);position:relative;overflow:hidden}
+  .t-a{background:#f5f6f8}.t-a:before{content:"";position:absolute;left:0;top:0;bottom:0;width:34px;background:#0f1729}
+  .t-a:after{content:"";position:absolute;left:46px;top:14px;right:14px;height:22px;background:linear-gradient(90deg,#4f46e5,#6d28d9);border-radius:5px}
+  .t-b{background:#0e1320}.t-b:before{content:"";position:absolute;left:12px;right:12px;top:12px;bottom:12px;background:repeating-linear-gradient(90deg,#1c2536 0 18%,transparent 18% 20%);border-radius:5px}
+  .t-c{background:#faf9f7}.t-c:before{content:"";position:absolute;left:0;top:0;bottom:0;width:40px;background:#f3f1ed;border-right:1px solid #ece9e3}
+  .t-c:after{content:"";position:absolute;left:52px;top:14px;right:14px;bottom:14px;background:repeating-linear-gradient(#fff 0 33%,#ece9e3 33% 34%);border-radius:4px}
+  .foot{margin-top:40px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px}
+  .foot h3{font-size:15px;margin-bottom:8px}
+  .foot p{font-size:13px;color:var(--muted)}
+  .foot .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tagi{font-size:11.5px;background:#1f2330;border:1px solid var(--line);border-radius:20px;padding:5px 12px;color:#c2c9d6}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">SAWA · NY CTO Dinner · Command Center</div>
+  <h1>Three architectures, one campaign.</h1>
+  <p class="lede">Same components — Overview, Lead Pipeline (outbound + inbound), Artefacts, Meetings — organized around three different philosophies. Open each, react, and we'll converge on the best. A critique agent is reviewing all three in parallel.</p>
+
+  <div class="grid">
+    <a class="card" href="proposal-a-briefing.html">
+      <div class="thumb t-a"></div>
+      <div class="pa">PROPOSAL A</div>
+      <h2>The Briefing</h2>
+      <div class="one">Overview-led · executive glance</div>
+      <p>Opens on a single at-a-glance home: KPIs, funnel, who just booked, today's meetings, this week's posts. Built so Adam learns everything in 5 seconds, then drills down. Calm light UI, left nav.</p>
+      <div class="meta"><b>Best when:</b> the daily ritual is "what's the state of play?"</div>
+      <div class="open">Open mockup →</div>
+    </a>
+
+    <a class="card" href="proposal-b-pipeline.html">
+      <div class="thumb t-b"></div>
+      <div class="pa">PROPOSAL B</div>
+      <h2>The Pipeline Board</h2>
+      <div class="one">Operations-led · kanban hero</div>
+      <p>The lead board is the product. Cards flow Sent → Connected → Replied → Adam → Booked, with an outbound/inbound toggle and live handoff rules. Dark "mission-control" feel for the people running the campaign.</p>
+      <div class="meta"><b>Best when:</b> the daily ritual is "who needs action now?"</div>
+      <div class="open">Open mockup →</div>
+    </a>
+
+    <a class="card" href="proposal-c-workspace.html">
+      <div class="thumb t-c"></div>
+      <div class="pa">PROPOSAL C</div>
+      <h2>The Workspace</h2>
+      <div class="one">Content-led · Notion-style</div>
+      <p>A calm, document-like workspace with a section sidebar. The Artefacts content calendar is the star — click a date, read the post, edit it inline, approve to schedule. Warm, editorial, mobile-friendly.</p>
+      <div class="meta"><b>Best when:</b> Adam's daily value is reviewing &amp; shaping content</div>
+      <div class="open">Open mockup →</div>
+    </a>
+  </div>
+
+  <div class="foot">
+    <h3>What's identical across all three</h3>
+    <p>The data model and integrations don't change — only how it's presented. Each pulls the same live sources:</p>
+    <div class="row">
+      <span class="tagi">⟳ Dripify webhooks → connection / reply status</span>
+      <span class="tagi">⟳ Calendly webhooks → meetings booked</span>
+      <span class="tagi">⟳ Landing page form → inbound signups</span>
+      <span class="tagi">⚑ Auto email-suppress on LinkedIn reply</span>
+      <span class="tagi">📱 Mobile + desktop</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

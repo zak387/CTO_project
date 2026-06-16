@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Lead Pipeline (Kanban)</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#0f1729; --muted:#5b6678; --line:#e6e9ef;
+    --accent:#4f46e5; --accent-soft:#eef0fe; --green:#0f9d6e;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06); --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.4}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:#0f1729;color:#cdd5e3;padding:22px 16px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center;font-size:13px}
+  .brand small{display:block;font-weight:500;color:#7b88a1;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#aab4c8;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+  .nav a.active{background:rgba(99,102,241,.16);color:#fff}
+  .nav a:hover:not(.active){background:rgba(255,255,255,.05);color:#fff}
+  .nav .ic{width:17px;text-align:center}
+  .main{padding:24px 28px 60px}
+  h1{font-size:21px;letter-spacing:-.4px;margin-bottom:3px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:var(--shadow)}
+  .seg button{border:none;background:none;color:var(--muted);font-size:13px;font-weight:600;padding:8px 18px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .seg button.on{background:var(--accent);color:#fff}
+  .seg .sq{width:8px;height:8px;border-radius:2px}
+  .seg .ct{font-size:11px;opacity:.75;font-weight:700}
+  .search{flex:1;min-width:170px;border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:13px;background:var(--panel);box-shadow:var(--shadow);color:#445}
+  .view{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:var(--shadow)}
+  .view button{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:7px;cursor:pointer}
+  .view button.on{background:#0f1729;color:#fff}
+  /* board */
+  .board{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;align-items:start}
+  .col{background:#eceef2;border-radius:var(--radius);min-height:300px}
+  .col-h{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 11px}
+  .col-h .t{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .col-h .led{width:8px;height:8px;border-radius:50%}
+  .col-h .ct{font-size:11px;color:var(--muted);background:#fff;border-radius:20px;padding:2px 9px;font-weight:700}
+  .cards{padding:0 10px 12px;display:flex;flex-direction:column;gap:9px}
+  .lc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 12px;box-shadow:var(--shadow);cursor:pointer;transition:.12s}
+  .lc:hover{transform:translateY(-1px);border-color:#cdd2dc}
+  .lc a{font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .lc a:hover{color:var(--accent);text-decoration:underline}
+  .lc .ext{font-size:10px;opacity:.5}
+  .lc .ro{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .more{text-align:center;font-size:11.5px;color:var(--muted);padding:7px;cursor:pointer}
+  /* accent columns */
+  .col.replied{background:#fbe9f0}
+  .col.replied .col-h .ct{background:#fff}
+  .col.replied .lc{border-color:#f3c6d7}
+  .col.booked{background:#e3f4ec}
+  .col.booked .lc{border-color:#bfe6d2}
+  .star{color:#d23f6b;font-size:11px;font-weight:800}
+  .mt{margin-top:7px;font-size:11px;font-weight:700;color:#0f9d6e;background:#fff;border:1px solid #bfe6d2;border-radius:6px;padding:3px 7px;display:inline-block}
+  @media(max-width:1080px){.board{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:760px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px}
+    .nav{flex-direction:row;flex-wrap:wrap;margin-top:0;gap:4px}
+    .main{padding:16px 14px 50px}
+    .board{grid-template-columns:1fr;gap:10px}
+    .col{min-height:0}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="nav">
+      <a><span class="ic">▣</span> Briefing</a>
+      <a class="active"><span class="ic">⇅</span> Lead Pipeline</a>
+      <a><span class="ic">◷</span> Meetings</a>
+      <a><span class="ic">✎</span> Artefacts</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <h1>Lead Pipeline</h1>
+    <div class="sub">Leads move left → right on their own as Dripify & Calendly update. Click a card for the timeline.</div>
+
+    <div class="controls">
+      <div class="seg">
+        <button class="on">Outbound <span class="ct">200</span></button>
+        <button>Inbound <span class="ct">28</span></button>
+      </div>
+      <input class="search" placeholder="🔍  Search by name or company…">
+      <div class="view"><button class="on">▦ Board</button><button>▤ Table</button></div>
+    </div>
+
+    <div class="board">
+      <!-- Connection Sent -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#94a3b8"></span> Connection Sent</div><span class="ct">62</span></div>
+        <div class="cards">
+          <div class="lc"><a href="#">Marcus Feld <span class="ext">↗</span></a><div class="ro">CTO · Tessellate AI</div></div>
+          <div class="lc"><a href="#">Hiro Tanaka <span class="ext">↗</span></a><div class="ro">CTO · Kanso Robotics</div></div>
+          <div class="lc"><a href="#">Priya Nair <span class="ext">↗</span></a><div class="ro">CIO · Solstice Group</div></div>
+          <div class="more">+ 59 more</div>
+        </div>
+      </div>
+      <!-- Connected -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#3b6bd6"></span> Connected</div><span class="ct">48</span></div>
+        <div class="cards">
+          <div class="lc"><a href="#">Lena Gruber <span class="ext">↗</span></a><div class="ro">CIO · Apex Manufacturing</div></div>
+          <div class="lc"><a href="#">Owen Brady <span class="ext">↗</span></a><div class="ro">CTO · Linnet Fintech</div></div>
+          <div class="more">+ 46 more</div>
+        </div>
+      </div>
+      <!-- Message Sent -->
+      <div class="col">
+        <div class="col-h"><div class="t"><span class="led" style="background:#c97a12"></span> Message Sent</div><span class="ct">53</span></div>
+        <div class="cards">
+          <div class="lc"><a href="#">Yusuf Demir <span class="ext">↗</span></a><div class="ro">CTO · Aster Cloud</div></div>
+          <div class="lc"><a href="#">Grace Okoro <span class="ext">↗</span></a><div class="ro">CIO · Pell &amp; Rowe</div></div>
+          <div class="lc"><a href="#">Ben Carter <span class="ext">↗</span></a><div class="ro">CTO · Madrona Soft</div></div>
+          <div class="more">+ 50 more</div>
+        </div>
+      </div>
+      <!-- Replied -->
+      <div class="col replied">
+        <div class="col-h"><div class="t"><span class="led" style="background:#d23f6b"></span> Replied</div><span class="ct">23</span></div>
+        <div class="cards">
+          <div class="lc"><a href="#">Derek Cho <span class="ext">↗</span></a><div class="ro">CTO · Northwind Logistics <span class="star">★ waiting on Adam</span></div></div>
+          <div class="lc"><a href="#">Thomas Wells <span class="ext">↗</span></a><div class="ro">CTO · Halcyon Media <span class="star">★ waiting on Adam</span></div></div>
+          <div class="more">+ 21 more</div>
+        </div>
+      </div>
+      <!-- Booked -->
+      <div class="col booked">
+        <div class="col-h"><div class="t"><span class="led" style="background:#0f9d6e"></span> Booked</div><span class="ct">14</span></div>
+        <div class="cards">
+          <div class="lc"><a href="#">Rajesh Kumar <span class="ext">↗</span></a><div class="ro">CTO · Vantage Health</div><div class="mt">📅 Jun 17 · 10:30</div></div>
+          <div class="lc"><a href="#">Derek Cho <span class="ext">↗</span></a><div class="ro">CTO · Northwind Logistics</div><div class="mt">📅 Jun 18 · 09:15</div></div>
+          <div class="more">+ 12 more</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Artefacts (Content Calendar)</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#0f1729; --muted:#5b6678; --line:#e6e9ef;
+    --accent:#4f46e5; --accent-soft:#eef0fe; --green:#0f9d6e; --amber:#d98a00; --amber-soft:#fdf3e3;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06); --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:#0f1729;color:#cdd5e3;padding:22px 16px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center;font-size:13px}
+  .brand small{display:block;font-weight:500;color:#7b88a1;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#aab4c8;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+  .nav a.active{background:rgba(99,102,241,.16);color:#fff}
+  .nav a:hover:not(.active){background:rgba(255,255,255,.05);color:#fff}
+  .nav .ic{width:17px;text-align:center}
+  .main{padding:24px 30px 60px}
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  h1{font-size:21px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .countdown{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 16px;box-shadow:var(--shadow);text-align:center;white-space:nowrap}
+  .countdown b{font-size:20px;color:var(--accent);line-height:1}.countdown span{font-size:11px;color:var(--muted);margin-left:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .cal{display:grid;grid-template-columns:70px repeat(3,1fr);gap:8px;align-items:stretch}
+  .colhdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;padding-bottom:2px}
+  .wklbl{font-size:10px;font-weight:700;color:#9aa3b5;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;text-align:right}
+  .acell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 11px;min-height:78px;cursor:pointer;box-shadow:var(--shadow);transition:.13s;display:flex;flex-direction:column}
+  .acell:hover{transform:translateY(-2px);border-color:#cdd2dc}
+  .acell .dnum{font-size:10px;color:#9aa3b5;font-weight:700}
+  .acell .hk{font-size:13px;font-weight:600;color:var(--ink);margin:4px 0 8px;line-height:1.25;flex:1}
+  .acell.draft{border-color:#e8c986;background:#fffdf7}
+  .acell.empty{border-style:dashed;background:#fafbfc;align-items:center;justify-content:center;color:#aab4c8;font-size:12px;font-weight:600}
+  .acell.empty:hover{border-color:var(--accent);color:var(--accent)}
+  .abadge{align-self:flex-start;font-size:9.5px;font-weight:800;letter-spacing:.03em;padding:2px 8px;border-radius:8px}
+  .st-live{background:#e6f7f0;color:#0f9d6e}.st-sched{background:#eef0fe;color:#4f46e5}.st-draft{background:#fdf3e3;color:#d98a00}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .note{margin-top:16px;font-size:12.5px;color:var(--muted)}
+  .note b{color:var(--ink)}
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px}
+    .nav{flex-direction:row;flex-wrap:wrap;margin-top:0;gap:4px}
+    .main{padding:18px 16px 50px}
+    .cal{grid-template-columns:44px repeat(3,1fr);gap:5px}
+    .acell{min-height:64px;padding:7px 8px}.acell .hk{font-size:11px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="nav">
+      <a href="01-briefing-home.html"><span class="ic">▣</span> Briefing</a>
+      <a href="02-lead-pipeline.html"><span class="ic">⇅</span> Lead Pipeline</a>
+      <a href="03-meetings.html"><span class="ic">◷</span> Meetings</a>
+      <a class="active"><span class="ic">✎</span> Artefacts</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1>Artefacts — content calendar</h1><div class="sub">The whole campaign on one surface. Click any post to read, edit, or approve. (See the interactive prototype for the post panel.)</div></div>
+      <div class="countdown"><b>6</b><span>posts drafted · 3× / week</span></div>
+    </div>
+
+    <section class="card">
+      <div class="cal">
+        <div class="colhdr"></div><div class="colhdr">Mon</div><div class="colhdr">Wed</div><div class="colhdr">Fri</div>
+
+        <div class="wklbl">Jun 22</div>
+        <div class="acell draft"><div class="dnum">MON 22</div><div class="hk">The binary AI-ready question</div><span class="abadge st-draft">DRAFT</span></div>
+        <div class="acell draft"><div class="dnum">WED 24</div><div class="hk">Adobe study: AI traffic +693%</div><span class="abadge st-draft">DRAFT</span></div>
+        <div class="acell draft"><div class="dnum">FRI 26</div><div class="hk">Dinner invite — direct CTA</div><span class="abadge st-draft">DRAFT</span></div>
+
+        <div class="wklbl">Jun 29</div>
+        <div class="acell draft"><div class="dnum">MON 29</div><div class="hk">AI-ready isn't a chatbot</div><span class="abadge st-draft">DRAFT</span></div>
+        <div class="acell draft"><div class="dnum">WED 01</div><div class="hk">Study: bad product data breaks trust</div><span class="abadge st-draft">DRAFT</span></div>
+        <div class="acell draft"><div class="dnum">FRI 03</div><div class="hk">Dinner invite — the agenda</div><span class="abadge st-draft">DRAFT</span></div>
+
+        <div class="wklbl">Jul 06</div>
+        <div class="acell empty">+ add post</div>
+        <div class="acell empty">+ add post</div>
+        <div class="acell empty">+ add post</div>
+
+        <div class="wklbl">Jul 13</div>
+        <div class="acell empty">+ add post</div>
+        <div class="acell empty">+ add post</div>
+        <div class="acell empty">+ add post</div>
+      </div>
+
+      <div class="legend">
+        <span><span class="abadge st-live">LIVE</span> posted to LinkedIn</span>
+        <span><span class="abadge st-sched">SCHEDULED</span> approved &amp; queued</span>
+        <span><span class="abadge st-draft">DRAFT</span> needs Adam's review</span>
+        <span style="border-left:3px solid #e8c986;padding-left:8px">amber outline = waiting on you</span>
+      </div>
+      <div class="note">Every post starts as a <b>Draft</b> written by SAWA. Adam opens it, reads/edits, and clicks <b>✓ Good to go live</b> — that review flips it to <b>Scheduled</b> and writes a timestamped entry to the post's <b>activity log</b> (Drafted → Edited → Reviewed by Adam). Posting itself stays manual; SAWA marks it Live after posting. The panel's ‹ › arrows walk through every post in one sitting.</div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Data Model & Reconciliation Queue</title>
+<style>
+  :root{--bg:#f5f6f8;--panel:#fff;--ink:#0f1729;--muted:#5b6678;--line:#e6e9ef;--accent:#4f46e5;--green:#0f9d6e;--amber:#d98a00;--rose:#d23f6b;--shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  .wrap{max-width:1000px;margin:0 auto;padding:36px 22px 70px}
+  .kick{font-size:12px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:25px;letter-spacing:-.5px;margin:8px 0 4px}
+  .lede{color:var(--muted);font-size:14px;max-width:680px}
+  .sec{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:34px 0 12px}
+  /* sources */
+  .sources{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .src{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
+  .src .nm{font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+  .src .by{font-size:11.5px;color:var(--muted);margin-top:7px}
+  .src .by b{color:var(--ink)}
+  .src .ev{font-size:11.5px;margin-top:9px;color:#445;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+  .dot{width:9px;height:9px;border-radius:3px}
+  .arrows{display:flex;justify-content:center;color:var(--muted);font-size:22px;margin:8px 0}
+  /* queue */
+  .queue{background:linear-gradient(160deg,#eef0fe,#fff);border:1.5px solid #cdd0fb;border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+  .queue h3{font-size:16px;display:flex;align-items:center;gap:9px}
+  .queue .desc{font-size:12.5px;color:var(--muted);margin:5px 0 14px}
+  .ladder{display:flex;flex-direction:column;gap:8px}
+  .step{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px}
+  .step .n{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+  .step .t{font-size:13px;font-weight:600}
+  .step .t small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+  .step .res{margin-left:auto;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .r-auto{background:#e6f7f0;color:var(--green)}.r-ask{background:#fdf3e3;color:var(--amber)}.r-new{background:#eef0fe;color:var(--accent)}
+  /* outcomes */
+  .outs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+  .out{border-radius:14px;padding:15px;box-shadow:var(--shadow)}
+  .out.auto{background:#e9f8f1;border:1px solid #bfe6d2}
+  .out.tray{background:#fdf6e8;border:1px solid #ecd9a8}
+  .out .h{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .out p{font-size:12px;color:#46505f;margin-top:6px}
+  /* lead record */
+  .lead{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .lead .lh{background:#0f1729;color:#fff;padding:13px 16px;font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:9px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .f{padding:11px 16px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:12.5px}
+  .f:nth-child(even){border-right:none}
+  .f .k{color:var(--muted);font-size:11px}
+  .f .v{font-weight:600;margin-top:2px}
+  .pill{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:#eef0fe;color:var(--accent)}
+  @media(max-width:720px){.sources{grid-template-columns:1fr}.outs{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.f{border-right:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kick">SAWA · SPEC §6</div>
+  <h1>Data Model &amp; Reconciliation Queue</h1>
+  <p class="lede">The tool keeps <b>one record per person</b>. Updates pour in from 3 tools that each name people differently. The Reconciliation Queue attaches each update to the right person — automatically when sure, via a review tray when not.</p>
+
+  <!-- SOURCES -->
+  <div class="sec">① Data comes in from 3 places — each identifies people differently</div>
+  <div class="sources">
+    <div class="src">
+      <div class="nm"><span class="dot" style="background:#4f46e5"></span> Dripify</div>
+      <div class="by">knows people by → <b>LinkedIn URL</b></div>
+      <div class="ev">connection sent · connected · message sent · <b>replied</b> (no text)</div>
+    </div>
+    <div class="src">
+      <div class="nm"><span class="dot" style="background:#0f9d6e"></span> Calendly</div>
+      <div class="by">knows people by → <b>email</b>, then <b>company + name</b> (booking form)</div>
+      <div class="ev"><b>booked</b> · cancelled</div>
+    </div>
+    <div class="src">
+      <div class="nm"><span class="dot" style="background:#d98a00"></span> Landing page</div>
+      <div class="by">knows people by → <b>email</b> (fallback: name+company)</div>
+      <div class="ev">new <b>inbound signup</b></div>
+    </div>
+  </div>
+
+  <div class="arrows">▼ ▼ ▼</div>
+
+  <!-- QUEUE -->
+  <div class="queue">
+    <h3>🧠 Reconciliation Queue <span style="font-size:12px;font-weight:500;color:var(--muted)">— "which of my people is this?"</span></h3>
+    <div class="desc">Every incoming event runs down this ladder and stops at the first match:</div>
+    <div class="ladder">
+      <div class="step"><span class="n">1</span><div class="t">LinkedIn URL <small>Dripify events carry it</small></div><span class="res r-auto">✓ auto-match</span></div>
+      <div class="step"><span class="n">2</span><div class="t">Email <small>Calendly booking / landing form</small></div><span class="res r-auto">✓ auto-match</span></div>
+      <div class="step"><span class="n">3</span><div class="t">Company + name <small>from the Calendly booking form — e.g. only one "Anita" at Meridian</small></div><span class="res r-ask">👤 confirm</span></div>
+      <div class="step"><span class="n">4</span><div class="t">No match <small>new inbound signup → new lead · stray booking → tray</small></div><span class="res r-new">＋ new / tray</span></div>
+    </div>
+
+    <div class="outs">
+      <div class="out auto"><div class="h">✓ Clean match → updates silently</div><p>The lead moves stage, the timeline gets an entry, suppression flips — no human needed. ~95% of events.</p></div>
+      <div class="out tray"><div class="h">👤 Unsure → Review Tray</div><p>"This booking might be Anita at Meridian — confirm?" One tap. Near-empty on a normal day. Stops bad guesses from corrupting the numbers.</p></div>
+    </div>
+  </div>
+
+  <!-- LEAD RECORD -->
+  <div class="sec">② What one Lead record looks like</div>
+  <div class="lead">
+    <div class="lh">◆ Lead #147 — Derek Cho</div>
+    <div class="fields">
+      <div class="f"><div class="k">Name</div><div class="v">Derek Cho</div></div>
+      <div class="f"><div class="k">Title · Company</div><div class="v">CTO · Northwind Logistics</div></div>
+      <div class="f"><div class="k">LinkedIn URL</div><div class="v">/in/derek-cho</div></div>
+      <div class="f"><div class="k">Email</div><div class="v">derek.cho@northwind.com</div></div>
+      <div class="f"><div class="k">Channel</div><div class="v"><span class="pill">OUTBOUND</span></div></div>
+      <div class="f"><div class="k">Stage</div><div class="v">Replied</div></div>
+      <div class="f"><div class="k">Email suppressed?</div><div class="v">Yes (replied)</div></div>
+      <div class="f"><div class="k">Timeline</div><div class="v">sent → connected → message → replied</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Proposal C · The Workspace</title>
+<style>
+  :root{
+    --bg:#faf9f7; --panel:#ffffff; --ink:#2c2a26; --muted:#8a847b; --line:#ece9e3;
+    --accent:#b4541e; --accent-soft:#f7ede4; --green:#3f7d52; --blue:#3a6ea5; --amber:#c98a1a;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+  .app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+  /* sidebar - notion style */
+  .side{background:#f3f1ed;border-right:1px solid var(--line);padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto}
+  .ws{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;font-weight:600;font-size:14px}
+  .ws .dot{width:24px;height:24px;border-radius:7px;background:var(--ink);color:#faf9f7;display:grid;place-items:center;font-size:12px}
+  .ws small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+  .sgroup{margin-top:20px}
+  .sg-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:0 8px 6px}
+  .snav{display:flex;flex-direction:column;gap:1px}
+  .snav a{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;color:#5c574e;text-decoration:none;font-size:13.5px}
+  .snav a.active{background:#e7e3db;color:var(--ink);font-weight:600}
+  .snav a:hover:not(.active){background:#ebe8e1}
+  .snav .ic{width:16px;text-align:center;opacity:.8}
+  .snav .badge{margin-left:auto;font-size:10.5px;background:#e2ddd3;color:#76705f;border-radius:10px;padding:1px 7px;font-weight:700}
+  .side-foot{margin-top:22px;padding:10px 8px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+  .sync{display:flex;align-items:center;gap:6px;color:var(--green)}
+  .pulse{width:6px;height:6px;border-radius:50%;background:#3f7d52;animation:p 2.2s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(63,125,82,.4)}70%{box-shadow:0 0 0 6px rgba(63,125,82,0)}100%{box-shadow:0 0 0 0 rgba(63,125,82,0)}}
+  /* main */
+  .main{display:grid;grid-template-columns:1fr 380px}
+  .doc{padding:30px 36px 60px;max-width:none}
+  .crumbs{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .crumbs b{color:var(--ink)}
+  h1{font-size:30px;letter-spacing:-.6px;display:flex;align-items:center;gap:12px}
+  h1 .emoji{font-size:30px}
+  .lede{color:var(--muted);font-size:14px;margin-top:6px;margin-bottom:24px}
+  .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .month{font-size:15px;font-weight:700}
+  .tbtn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 11px;font-size:12.5px;color:#5c574e;cursor:pointer;font-weight:500}
+  .tbtn.active{background:var(--ink);color:#faf9f7;border-color:var(--ink)}
+  .spacer{flex:1}
+  /* calendar */
+  .cal{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);background:#f3f1ed;border-bottom:1px solid var(--line)}
+  .dow span{padding:9px 10px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .weeks{display:grid;grid-template-columns:repeat(7,1fr)}
+  .day{min-height:96px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 8px;position:relative}
+  .day:nth-child(7n){border-right:none}
+  .day .n{font-size:12px;color:#9a948a;font-weight:600}
+  .day.out .n{color:#cfc9bd}
+  .day.today .n{background:var(--accent);color:#fff;border-radius:50%;width:21px;height:21px;display:grid;place-items:center}
+  .ev{margin-top:6px;border-radius:7px;padding:5px 7px;font-size:11px;font-weight:600;cursor:pointer;line-height:1.25}
+  .ev.live{background:#e8f1ea;color:#3f7d52}
+  .ev.sched{background:#e7eef6;color:#3a6ea5}
+  .ev.draft{background:#fbf1dd;color:#a9760f;border:1px dashed #e2c98c}
+  .ev.sel{outline:2px solid var(--accent);outline-offset:1px}
+  /* right rail = open post */
+  .rail{border-left:1px solid var(--line);background:var(--panel);padding:24px 22px;position:sticky;top:0;height:100vh;overflow:auto}
+  .rail .ptag{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:#fbf1dd;color:#a9760f}
+  .rail h3{font-size:18px;margin:12px 0 4px;letter-spacing:-.3px}
+  .rail .meta{font-size:12px;color:var(--muted);display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .rail .meta b{color:#5c574e}
+  .editor{border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;color:#3a362f;line-height:1.6;background:#fdfcfa}
+  .editor p{margin-bottom:10px}
+  .editor .hl{background:#fff3d6}
+  .ractions{display:flex;gap:8px;margin-top:16px}
+  .btn{flex:1;border:none;border-radius:9px;padding:10px;font-size:13px;font-weight:600;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:#f3f1ed;color:#5c574e}
+  .rail .small{font-size:11.5px;color:var(--muted);margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  .rail .small b{color:var(--ink)}
+  @media(max-width:1080px){.main{grid-template-columns:1fr}.rail{position:static;height:auto;border-left:none;border-top:1px solid var(--line)}}
+  @media(max-width:760px){.app{grid-template-columns:1fr}.side{position:static;height:auto}.day{min-height:64px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="ws"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner · workspace</small></div></div>
+    <div class="sgroup">
+      <div class="sg-label">Campaign</div>
+      <nav class="snav">
+        <a><span class="ic">⌂</span> Overview</a>
+        <a><span class="ic">⇅</span> Lead Pipeline <span class="badge">200</span></a>
+        <a class="active"><span class="ic">✎</span> Artefacts <span class="badge">3/wk</span></a>
+        <a><span class="ic">◷</span> Meetings <span class="badge">21</span></a>
+      </nav>
+    </div>
+    <div class="sgroup">
+      <div class="sg-label">Quick views</div>
+      <nav class="snav">
+        <a><span class="ic">★</span> Who's coming</a>
+        <a><span class="ic">⚑</span> Needs Adam <span class="badge">5</span></a>
+        <a><span class="ic">✉</span> Email follow-ups</a>
+      </nav>
+    </div>
+    <div class="side-foot">
+      <div class="sync"><span class="pulse"></span> Synced · 2 min ago</div>
+      <div style="margin-top:6px">Dripify · Calendly · Landing page</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="doc">
+      <div class="crumbs">Campaign / <b>Artefacts</b></div>
+      <h1><span class="emoji">✎</span> Artefacts</h1>
+      <div class="lede">LinkedIn content for Adam — 3 posts a week (Mon · Wed · Fri). Click any post to read and edit it.</div>
+
+      <div class="toolbar">
+        <span class="month">June 2026</span>
+        <button class="tbtn">‹</button><button class="tbtn">›</button>
+        <div class="spacer"></div>
+        <button class="tbtn active">Calendar</button>
+        <button class="tbtn">List</button>
+        <button class="tbtn">+ New post</button>
+      </div>
+
+      <div class="cal">
+        <div class="dow"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+        <div class="weeks">
+          <!-- week 1 -->
+          <div class="day out"><div class="n">1</div></div>
+          <div class="day out"><div class="n">2</div></div>
+          <div class="day out"><div class="n">3</div><div class="ev live">● US entry myth</div></div>
+          <div class="day out"><div class="n">4</div></div>
+          <div class="day out"><div class="n">5</div><div class="ev live">● Infra at scale</div></div>
+          <div class="day out"><div class="n">6</div></div>
+          <div class="day out"><div class="n">7</div></div>
+          <!-- week 2 -->
+          <div class="day"><div class="n">8</div><div class="ev live">● Why dinners</div></div>
+          <div class="day"><div class="n">9</div></div>
+          <div class="day"><div class="n">10</div><div class="ev live">● CIO blindspots</div></div>
+          <div class="day"><div class="n">11</div></div>
+          <div class="day"><div class="n">12</div><div class="ev live">● Trust &amp; speed</div></div>
+          <div class="day"><div class="n">13</div></div>
+          <div class="day"><div class="n">14</div></div>
+          <!-- week 3 -->
+          <div class="day today"><div class="n">15</div><div class="ev live">● Boardroom vs table</div></div>
+          <div class="day"><div class="n">16</div></div>
+          <div class="day"><div class="n">17</div><div class="ev sched">◷ CIO underestimates</div></div>
+          <div class="day"><div class="n">18</div></div>
+          <div class="day"><div class="n">19</div><div class="ev draft sel">✎ 21 leaders said yes</div></div>
+          <div class="day"><div class="n">20</div></div>
+          <div class="day"><div class="n">21</div></div>
+          <!-- week 4 -->
+          <div class="day"><div class="n">22</div><div class="ev draft">✎ The guest list</div></div>
+          <div class="day"><div class="n">23</div></div>
+          <div class="day"><div class="n">24</div><div class="ev draft">✎ What to expect</div></div>
+          <div class="day"><div class="n">25</div></div>
+          <div class="day"><div class="n">26</div><div class="ev draft">✎ Final seats</div></div>
+          <div class="day"><div class="n">27</div></div>
+          <div class="day"><div class="n">28</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT RAIL: open post editor -->
+    <aside class="rail">
+      <span class="ptag">✎ Draft · needs review</span>
+      <h3>"21 tech leaders have already said yes"</h3>
+      <div class="meta"><span>📅 <b>Fri, Jun 19</b></span><span>⏰ <b>9:00 AM</b></span><span>👤 <b>Adam Reyes</b></span></div>
+      <div class="editor">
+        <p><b>The dinner invite that 21 tech leaders have already said yes to.</b></p>
+        <p>When we started reaching out to CTOs and CIOs across New York, we expected the usual: polite nos, "circle back next quarter," silence.</p>
+        <p class="hl">Instead, 21 of them cleared an evening in September. Here's what changed →</p>
+        <p>It wasn't the pitch. It was the room. The right 30 people, one table, zero slides…</p>
+      </div>
+      <div class="ractions">
+        <button class="btn primary">Save &amp; approve</button>
+        <button class="btn ghost">Suggest edit</button>
+      </div>
+      <div class="small">Last edited by <b>SAWA team</b> · 1h ago. Approving schedules this post to publish automatically Fri 9:00 AM.</div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

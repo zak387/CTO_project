@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Proposal A · The Briefing</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#0f1729; --muted:#5b6678; --line:#e6e9ef;
+    --accent:#4f46e5; --accent-soft:#eef0fe; --green:#0f9d6e; --amber:#d98a00; --rose:#e0496b;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+  /* sidebar */
+  .side{background:#0f1729;color:#cdd5e3;padding:22px 16px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px;letter-spacing:.3px;margin-bottom:6px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center;font-size:13px}
+  .brand small{display:block;font-weight:500;color:#7b88a1;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#aab4c8;text-decoration:none;font-size:13.5px;font-weight:500}
+  .nav a.active{background:rgba(99,102,241,.16);color:#fff}
+  .nav a:hover:not(.active){background:rgba(255,255,255,.05);color:#fff}
+  .nav .ic{width:17px;text-align:center;opacity:.9}
+  .side-foot{position:absolute;bottom:20px;left:16px;right:16px;font-size:11.5px;color:#6b7790;border-top:1px solid rgba(255,255,255,.07);padding-top:14px}
+  .sync{display:flex;align-items:center;gap:7px;color:#86e0b8}
+  .pulse{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:p 2s infinite}
+  @keyframes p{0%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+  /* main */
+  .main{padding:26px 30px 60px}
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  h1{font-size:22px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:3px}
+  .countdown{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 18px;box-shadow:var(--shadow);text-align:center}
+  .countdown b{font-size:24px;color:var(--accent);display:block;line-height:1}
+  .countdown span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  /* kpi row */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:var(--shadow)}
+  .kpi .label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.2px}
+  .kpi .num{font-size:30px;font-weight:700;letter-spacing:-1px;margin-top:6px}
+  .kpi .delta{font-size:12px;margin-top:5px;font-weight:600}
+  .kpi .delta.up{color:var(--green)} .kpi .delta.flat{color:var(--muted)}
+  .kpi.hl{background:linear-gradient(160deg,#4f46e5,#6d28d9);color:#fff;border:none}
+  .kpi.hl .label,.kpi.hl .delta{color:#dcd9ff}
+  /* grid */
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .card h2{font-size:14px;padding:16px 18px 12px;display:flex;align-items:center;justify-content:space-between}
+  .card h2 .tag{font-size:11px;color:var(--muted);font-weight:500}
+  /* funnel */
+  .funnel{padding:4px 18px 18px}
+  .frow{display:flex;align-items:center;gap:12px;margin:9px 0}
+  .frow .name{width:130px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .bar{flex:1;height:30px;border-radius:8px;background:var(--accent-soft);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0;width:var(--w);background:linear-gradient(90deg,#6366f1,#4f46e5);border-radius:8px;display:flex;align-items:center;padding-left:12px;color:#fff;font-size:12.5px;font-weight:700}
+  .frow .pct{width:46px;text-align:right;font-size:12.5px;font-weight:700}
+  .chan-split{display:flex;gap:8px;padding:0 18px 16px}
+  .chip{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .chip .t{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+  .chip .v{font-size:18px;font-weight:700;margin-top:2px}
+  .sq{width:8px;height:8px;border-radius:2px;display:inline-block}
+  /* booked list */
+  .booked{padding:6px 8px 10px}
+  .brow{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px}
+  .brow:hover{background:var(--bg)}
+  .av{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+  .brow .who{flex:1;min-width:0}
+  .brow .who b{font-size:13px;display:block}
+  .brow .who small{font-size:11.5px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pill{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px}
+  .pill.out{background:#eef0fe;color:#4f46e5}
+  .pill.in{background:#e6f7f0;color:#0f9d6e}
+  .when{font-size:11px;color:var(--muted);width:60px;text-align:right}
+  /* two small cards */
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  .mtg{display:flex;gap:12px;padding:11px 18px;border-top:1px solid var(--line);align-items:center}
+  .mtg:first-of-type{border-top:none}
+  .date-chip{width:46px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:5px 0}
+  .date-chip b{display:block;font-size:16px;line-height:1} .date-chip span{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .mtg .info{flex:1}.mtg .info b{font-size:13px}.mtg .info small{display:block;color:var(--muted);font-size:11.5px}
+  .mtg .time{font-size:12px;font-weight:600;color:var(--accent)}
+  /* posts */
+  .post{display:flex;gap:12px;padding:12px 18px;border-top:1px solid var(--line);align-items:flex-start}
+  .post:first-of-type{border-top:none}
+  .pdate{font-size:11px;font-weight:700;color:var(--muted);width:52px;flex-shrink:0;padding-top:2px}
+  .post .body{flex:1}.post .body p{font-size:12.5px;color:#33405a;line-height:1.5}
+  .pstatus{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:6px;display:inline-block}
+  .ps-live{background:#e6f7f0;color:#0f9d6e}.ps-draft{background:#fdf3e3;color:#d98a00}.ps-sched{background:#eef0fe;color:#4f46e5}
+  @media(max-width:980px){.app{grid-template-columns:1fr}.side{position:static;height:auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .nav{flex-direction:row;flex-wrap:wrap;margin-top:0}.side-foot{display:none}.kpis{grid-template-columns:repeat(2,1fr)}
+    .grid,.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="nav">
+      <a class="active"><span class="ic">▣</span> Briefing</a>
+      <a><span class="ic">⇅</span> Lead Pipeline</a>
+      <a><span class="ic">✎</span> Artefacts</a>
+      <a><span class="ic">◷</span> Meetings</a>
+      <a><span class="ic">⚙</span> Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="sync"><span class="pulse"></span> Synced 2 min ago</div>
+      <div style="margin-top:8px;color:#5b6580">Dripify · Calendly · Landing</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="top">
+      <div>
+        <h1>Good morning, Adam 👋</h1>
+        <div class="sub">Campaign briefing · Everything you need in one screen · Tuesday, June 16</div>
+      </div>
+      <div class="countdown"><b>94</b><span>days to dinner · Sep 18</span></div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi"><div class="label">Targets contacted</div><div class="num">184</div><div class="delta up">▲ 12 today · of 200</div></div>
+      <div class="kpi"><div class="label">Connections</div><div class="num">96</div><div class="delta up">▲ 52% accept rate</div></div>
+      <div class="kpi"><div class="label">Conversations</div><div class="num">41</div><div class="delta up">▲ 4 new replies</div></div>
+      <div class="kpi"><div class="label">Inbound signups</div><div class="num">28</div><div class="delta up">▲ 3 this week</div></div>
+      <div class="kpi hl"><div class="label">Meetings booked</div><div class="num">21</div><div class="delta">▲ 2 since yesterday</div></div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid">
+      <!-- funnel -->
+      <div class="card">
+        <h2>Campaign funnel <span class="tag">Outbound + Inbound combined</span></h2>
+        <div class="funnel">
+          <div class="frow"><div class="name">Contacted</div><div class="bar"><i style="--w:100%">212</i></div><div class="pct">100%</div></div>
+          <div class="frow"><div class="name">Connected / Engaged</div><div class="bar"><i style="--w:58%">124</i></div><div class="pct">58%</div></div>
+          <div class="frow"><div class="name">Replied / Signed up</div><div class="bar"><i style="--w:33%">69</i></div><div class="pct">33%</div></div>
+          <div class="frow"><div class="name">Meeting booked</div><div class="bar"><i style="--w:21%">21</i></div><div class="pct">21%</div></div>
+        </div>
+        <div class="chan-split">
+          <div class="chip"><div class="t"><span class="sq" style="background:#4f46e5"></span> Outbound (Dripify)</div><div class="v">12 booked</div></div>
+          <div class="chip"><div class="t"><span class="sq" style="background:#0f9d6e"></span> Inbound (Landing)</div><div class="v">9 booked</div></div>
+        </div>
+      </div>
+
+      <!-- recently booked -->
+      <div class="card">
+        <h2>Recently booked <span class="tag">who's coming</span></h2>
+        <div class="booked">
+          <div class="brow"><div class="av">RK</div><div class="who"><b>Rajesh Kumar</b><small>CTO · Vantage Health</small></div><span class="pill out">OUT</span><div class="when">2h ago</div></div>
+          <div class="brow"><div class="av">SM</div><div class="who"><b>Sofia Marchetti</b><small>CIO · Brightline Retail</small></div><span class="pill in">IN</span><div class="when">5h ago</div></div>
+          <div class="brow"><div class="av">DC</div><div class="who"><b>Derek Cho</b><small>CTO · Northwind Logistics</small></div><span class="pill out">OUT</span><div class="when">Yest</div></div>
+          <div class="brow"><div class="av">AP</div><div class="who"><b>Anita Patel</b><small>CIO · Meridian Bank</small></div><span class="pill in">IN</span><div class="when">Yest</div></div>
+          <div class="brow"><div class="av">TW</div><div class="who"><b>Thomas Wells</b><small>CTO · Halcyon Media</small></div><span class="pill out">OUT</span><div class="when">2d</div></div>
+          <div class="brow"><div class="av">LG</div><div class="who"><b>Lena Gruber</b><small>CIO · Apex Manufacturing</small></div><span class="pill out">OUT</span><div class="when">2d</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="row2">
+      <div class="card">
+        <h2>Upcoming meetings <span class="tag">next with Adam</span></h2>
+        <div class="mtg"><div class="date-chip"><b>17</b><span>Jun</span></div><div class="info"><b>Rajesh Kumar — Vantage Health</b><small>Intro call · booked via Dripify reply</small></div><div class="time">10:30</div></div>
+        <div class="mtg"><div class="date-chip"><b>17</b><span>Jun</span></div><div class="info"><b>Sofia Marchetti — Brightline</b><small>Event walkthrough · inbound signup</small></div><div class="time">14:00</div></div>
+        <div class="mtg"><div class="date-chip"><b>18</b><span>Jun</span></div><div class="info"><b>Derek Cho — Northwind</b><small>Intro call · booked via Dripify reply</small></div><div class="time">09:15</div></div>
+      </div>
+
+      <div class="card">
+        <h2>This week's artefacts <span class="tag">LinkedIn · 3× / week</span></h2>
+        <div class="post"><div class="pdate">MON 15</div><div class="body"><p>"Why the best US market entries start at the dinner table, not the boardroom…"</p><span class="pstatus ps-live">● Live · 1.2k views</span></div></div>
+        <div class="post"><div class="pdate">WED 17</div><div class="body"><p>"3 things every CIO underestimates about scaling infra into the US…"</p><span class="pstatus ps-sched">◷ Scheduled · 9:00am</span></div></div>
+        <div class="post"><div class="pdate">FRI 19</div><div class="body"><p>"The dinner invite that 21 tech leaders have already said yes to. [draft]"</p><span class="pstatus ps-draft">✎ Draft · needs review</span></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

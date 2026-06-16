@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command Center — Interactive Prototype</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#0f1729; --muted:#5b6678; --line:#e6e9ef;
+    --accent:#4f46e5; --accent-soft:#eef0fe; --green:#0f9d6e;
+    --amber:#d98a00; --amber-soft:#fdf3e3;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06); --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  a{color:inherit}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+
+  /* ---------- sidebar ---------- */
+  .side{background:#0f1729;color:#cdd5e3;padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center;font-size:13px}
+  .brand small{display:block;font-weight:500;color:#7b88a1;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#aab4c8;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer;transition:.14s}
+  .nav a.active{background:rgba(99,102,241,.16);color:#fff}
+  .nav a:hover:not(.active){background:rgba(255,255,255,.05);color:#fff}
+  .nav .ic{width:17px;text-align:center}
+  .nav a .badge-n{margin-left:auto;font-size:10.5px;font-weight:800;background:#d23f6b;color:#fff;border-radius:20px;padding:1px 7px}
+  .side .foot{margin-top:auto;font-size:11px;color:#5b6680;border-top:1px solid #1d2536;padding-top:14px}
+  .side .foot b{color:#9fb0cc;font-weight:700}
+
+  /* ---------- main ---------- */
+  .main{padding:24px 30px 70px;min-width:0}
+  .view{display:none}
+  .view.show{display:block;animation:fadeUp .32s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  h1{font-size:21px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .countdown{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 16px;box-shadow:var(--shadow);text-align:center;white-space:nowrap}
+  .countdown b{font-size:20px;color:var(--accent);line-height:1}.countdown span{font-size:11px;color:var(--muted);margin-left:6px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .card h2{font-size:14px;padding:15px 18px 11px;display:flex;align-items:center;justify-content:space-between}
+  .card h2 .tag{font-size:11px;color:var(--muted);font-weight:500}
+  .cnt{background:var(--accent);color:#fff;font-size:12px;font-weight:700;border-radius:20px;padding:1px 9px;margin-left:8px}
+  .stagger>*{animation:fadeUp .4s ease backwards}
+
+  /* ---------- briefing ---------- */
+  .hero{margin-bottom:18px;border:1px solid #dcdcff}
+  .hero h2{background:linear-gradient(90deg,#f3f2ff,#fff);border-bottom:1px solid var(--line)}
+  .wrow{display:flex;align-items:center;gap:13px;padding:13px 18px;border-top:1px solid var(--line);cursor:pointer}
+  .wrow:first-of-type{border-top:none}
+  .wrow:hover{background:#fafaff}
+  .av{width:38px;height:38px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+  .wrow .who{flex:1;min-width:0}
+  .wname{font-size:14.5px;font-weight:600;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .wrow:hover .wname{color:var(--accent)}
+  .wname .ext{font-size:11px;opacity:.6}
+  .wrow .role{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .pill{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px}
+  .pill.out{background:#eef0fe;color:#4f46e5}.pill.in{background:#e6f7f0;color:#0f9d6e}
+  .ago{font-size:12px;color:var(--muted);width:54px;text-align:right;flex-shrink:0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .funnel{padding:6px 18px 14px}
+  .frow{display:flex;align-items:center;gap:12px;margin:9px 0;cursor:pointer}
+  .frow .name{width:150px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .bar{flex:1;height:28px;border-radius:8px;background:var(--accent-soft);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,#6366f1,#4f46e5);border-radius:8px;display:flex;align-items:center;padding-left:11px;color:#fff;font-size:12px;font-weight:700;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+  .frow:hover .bar i{filter:brightness(1.07)}
+  .splitc{display:flex;gap:8px;padding:4px 18px 16px}
+  .chip{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .chip .t{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+  .chip .v{font-size:17px;font-weight:700;margin-top:2px}
+  .sq{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .mtg{display:flex;gap:12px;padding:11px 18px;border-top:1px solid var(--line);align-items:center;cursor:pointer}
+  .mtg:first-of-type{border-top:none}
+  .mtg:hover{background:#fafaff}
+  .dchip{width:48px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:5px 0;flex-shrink:0}
+  .dchip b{display:block;font-size:15px;line-height:1}.dchip span{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .mtg .info{flex:1}.mtg .info b{font-size:13px}.mtg .info small{display:block;color:var(--muted);font-size:11.5px}
+  .mtg .time{font-size:12.5px;font-weight:700;color:var(--accent)}
+  .arts{margin-top:18px}
+  .acards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:6px 18px 18px}
+  .acard{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px;cursor:pointer;transition:.13s}
+  .acard:hover{border-color:#cdd2dc;transform:translateY(-2px)}
+  .acard .d{font-size:11px;font-weight:700;color:var(--muted)}
+  .acard p{font-size:12.5px;color:#33405a;margin:7px 0 9px;line-height:1.45}
+  .st{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}
+  .st-live{background:#e6f7f0;color:#0f9d6e}.st-sched{background:#eef0fe;color:#4f46e5}.st-draft{background:#fdf3e3;color:#d98a00}
+
+  /* ---------- pipeline ---------- */
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:var(--shadow)}
+  .seg button{border:none;background:none;color:var(--muted);font-size:13px;font-weight:600;padding:8px 18px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:7px}
+  .seg button.on{background:var(--accent);color:#fff}
+  .seg .ct{font-size:11px;opacity:.75;font-weight:700}
+  .search{flex:1;min-width:170px;border:1px solid var(--line);border-radius:10px;padding:9px 13px;font-size:13px;background:var(--panel);box-shadow:var(--shadow);color:#445}
+  .vtoggle{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:var(--shadow)}
+  .vtoggle button{border:none;background:none;color:var(--muted);font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:7px;cursor:pointer}
+  .vtoggle button.on{background:#0f1729;color:#fff}
+  .board{display:grid;gap:14px;align-items:start}
+  .col{background:#eceef2;border-radius:14px;min-height:120px}
+  .col-h{display:flex;align-items:center;justify-content:space-between;padding:13px 14px 11px}
+  .col-h .t{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .col-h .led{width:8px;height:8px;border-radius:50%}
+  .col-h .ct{font-size:11px;color:var(--muted);background:#fff;border-radius:20px;padding:2px 9px;font-weight:700}
+  .cards{padding:0 10px 12px;display:flex;flex-direction:column;gap:9px}
+  .lc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 12px;box-shadow:var(--shadow);cursor:pointer;transition:.12s}
+  .lc:hover{transform:translateY(-1px);border-color:#cdd2dc}
+  .lc .lcn{font-size:13px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:5px}
+  .lc:hover .lcn{color:var(--accent)}
+  .lc .ext{font-size:10px;opacity:.5}
+  .lc .ro{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .more{text-align:center;font-size:11.5px;color:var(--muted);padding:7px;cursor:pointer}
+  .col.replied{background:#fbe9f0}.col.replied .lc{border-color:#f3c6d7}
+  .col.booked{background:#e3f4ec}.col.booked .lc{border-color:#bfe6d2}
+  .star{color:#d23f6b;font-size:11px;font-weight:800}
+  .mt{margin-top:7px;font-size:11px;font-weight:700;color:#0f9d6e;background:#fff;border:1px solid #bfe6d2;border-radius:6px;padding:3px 7px;display:inline-block}
+  /* table */
+  .ptable{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .ptable th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line);background:#fafbfc}
+  .ptable td{padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px}
+  .ptable tr:last-child td{border-bottom:none}
+  .ptable tbody tr{cursor:pointer}.ptable tbody tr:hover{background:#fafaff}
+  .ptable .nm{font-weight:600}
+  .stagebadge{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:#eef0f3;color:#556}
+  .stagebadge.replied{background:#fdeef3;color:#d23f6b}.stagebadge.booked{background:#e6f7f0;color:#0f9d6e}
+
+  /* ---------- meetings ---------- */
+  .narrow{max-width:760px}
+  .day{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);background:var(--bg);padding:7px 18px;border-top:1px solid var(--line)}
+  .card h2 + .day{border-top:none}
+  .mrow{display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid var(--line);cursor:pointer}
+  .mrow:hover{background:#fafaff}
+  .mrow .time{width:52px;flex-shrink:0;font-size:13.5px;font-weight:700;color:var(--accent);text-align:center}
+  .mrow .who{flex:1;min-width:0}
+  details.past{margin-top:18px}
+  details.past summary{list-style:none;cursor:pointer}
+  details.past summary::-webkit-details-marker{display:none}
+  .chev{margin-left:auto;color:var(--muted);font-size:12px;transition:transform .15s}
+  details[open] .chev{transform:rotate(90deg)}
+  .cnt.muted{background:#aab4c8}
+  .mrow.muted .time,.mrow.muted .wname,.mrow.muted .role{color:var(--muted)}
+  .mrow.cancelled .wname{text-decoration:line-through;color:#9aa3b2}
+  .tag-cancel{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fdeaea;color:#d04545;flex-shrink:0}
+
+  /* ---------- artefacts grid ---------- */
+  .cal{display:grid;grid-template-columns:70px repeat(3,1fr);gap:8px;align-items:stretch;margin-top:4px}
+  .cal .colhdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;padding-bottom:2px}
+  .cal .wklbl{font-size:10px;font-weight:700;color:#9aa3b5;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;text-align:right}
+  .acell{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 11px;min-height:78px;cursor:pointer;box-shadow:var(--shadow);transition:.13s;display:flex;flex-direction:column}
+  .acell:hover{transform:translateY(-2px);border-color:#cdd2dc}
+  .acell .dnum{font-size:10px;color:#9aa3b5;font-weight:700}
+  .acell .hk{font-size:13px;font-weight:600;color:var(--ink);margin:4px 0 8px;line-height:1.25;flex:1}
+  .acell.draft{border-color:#e8c986;background:#fffdf7}
+  .acell.empty{border-style:dashed;background:#fafbfc;align-items:center;justify-content:center;color:#aab4c8;font-size:12px;font-weight:600}
+  .acell.empty:hover{border-color:var(--accent);color:var(--accent)}
+  .abadge{align-self:flex-start;font-size:9.5px;font-weight:800;letter-spacing:.03em;padding:2px 8px;border-radius:8px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:14px 2px 0;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+
+  /* ---------- slide-over drawer (lead detail) ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,41,.45);display:flex;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .22s;z-index:50}
+  .overlay.open{opacity:1;pointer-events:auto}
+  .drawer{width:440px;max-width:100%;height:100vh;background:var(--bg);overflow:auto;box-shadow:-12px 0 40px rgba(0,0,0,.2);transform:translateX(40px);transition:transform .26s ease}
+  .overlay.open .drawer{transform:none}
+  .dh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:2}
+  .dh .ttl{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+  .x{border:none;background:#eef0f3;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;color:#556}
+  .pad{padding:20px}
+  .lead-h{display:flex;gap:14px;align-items:center}
+  .lead-h .av{width:54px;height:54px;border-radius:14px;font-size:19px}
+  .lead-h .nm a{font-size:18px;font-weight:700;color:var(--ink);text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+  .lead-h .nm a .ext{font-size:11px;opacity:.55}
+  .lead-h .ro{font-size:13px;color:var(--muted);margin-top:2px}
+  .badges{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+  .dbadge{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px}
+  .b-out{background:#eef0fe;color:#4f46e5}.b-in{background:#e6f7f0;color:#0f9d6e}.b-stage{background:#fdeef3;color:#d23f6b}
+  .blk{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-top:16px;overflow:hidden}
+  .blk-h{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;padding:13px 16px 0}
+  .contact{display:flex;flex-direction:column;gap:1px;padding:8px 6px 12px}
+  .crow{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;font-size:13px}
+  .crow:hover{background:#fafaff}
+  .crow .ic{width:18px;text-align:center}
+  .crow .lab{color:var(--muted);width:74px;font-size:12px}
+  .crow .val{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .crow .act{font-size:11px;color:var(--accent);font-weight:700;cursor:pointer}
+  .meet{margin:12px 16px 16px;background:#e6f7f0;border:1px solid #bfe6d2;border-radius:11px;padding:13px 15px;display:flex;align-items:center;gap:12px}
+  .meet .cal2{width:42px;height:42px;border-radius:10px;background:#fff;border:1px solid #bfe6d2;display:grid;place-items:center;font-size:18px}
+  .meet b{font-size:14px;color:#0c6f4f}.meet small{display:block;color:#3f8a6e;font-size:11.5px;margin-top:1px}
+  .tl{padding:10px 18px 18px}
+  .ti{display:flex;gap:13px;position:relative;padding-bottom:16px}
+  .ti:last-child{padding-bottom:2px}
+  .ti:not(:last-child):before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:2px;background:var(--line)}
+  .tdot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex-shrink:0;z-index:1}
+  .tdot.done{background:var(--accent);color:#fff}
+  .tdot.now{background:#fdeef3;color:#d23f6b;border:2px solid #d23f6b}
+  .tdot.future{background:#eef0f3;color:#aab;border:2px dashed #cfd5de}
+  .ti .lab{font-size:13px;font-weight:600}
+  .ti.future .lab{color:#a5adba;font-weight:500}
+  .ti .tm{font-size:11.5px;color:var(--muted);margin-top:1px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;padding:4px 16px 16px}
+  .abtn{flex:1;min-width:120px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px;font-size:12.5px;font-weight:600;color:#445;cursor:pointer}
+  .abtn:hover{border-color:var(--accent);color:var(--accent)}
+  .notes textarea{width:calc(100% - 32px);margin:0 16px 16px;border:1px solid var(--line);border-radius:10px;padding:11px;font-size:13px;font-family:inherit;color:#445;min-height:70px;resize:vertical}
+
+  /* ---------- post panel (artefacts) ---------- */
+  .ppanel{width:480px;max-width:100%;height:100vh;background:#fff;overflow:auto;box-shadow:-12px 0 40px rgba(0,0,0,.2);transform:translateX(40px);transition:transform .26s ease;display:flex;flex-direction:column}
+  .overlay.open .ppanel{transform:none}
+  .pp-top{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .pp-top .hk{font-size:18px;font-weight:700}
+  .pp-top .meta{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .pp-body{padding:18px 22px;flex:1}
+  .field-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:7px}
+  .post-text{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13.5px;line-height:1.55;color:#26262c;min-height:150px;white-space:pre-wrap;outline:none}
+  .post-text:focus{border-color:var(--accent);background:#fff}
+  .pp-note{background:var(--amber-soft);border:1px dashed #e6cf94;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#7a5c12;margin-top:14px}
+  .pp-log{margin-top:6px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .logrow{display:flex;gap:10px;padding:9px 12px;border-top:1px solid var(--line);font-size:12.5px;align-items:flex-start}
+  .logrow:first-child{border-top:none}
+  .logdot{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0}
+  .logrow.review .logdot{background:var(--green)}
+  .logrow b{font-weight:600}
+  .logt{color:var(--muted);font-size:11.5px;margin-left:auto;white-space:nowrap;padding-left:10px}
+  .reviewed-flag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--green);background:#e6f7f0;border:1px solid #bfe6d2;border-radius:20px;padding:2px 9px}
+  .pp-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#9aa3b5;padding:50px 20px;gap:10px}
+  .pp-empty .big{font-size:30px}
+  .pp-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#fbfbfc;position:sticky;bottom:0}
+  .walk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .walk .arrow{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;background:#fff;cursor:pointer;font-size:14px}
+  .walk .arrow:hover{border-color:var(--accent);color:var(--accent)}
+  .pbtn{font-size:12.5px;font-weight:700;padding:9px 15px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#333;cursor:pointer}
+  .pbtn.primary{background:var(--green);border-color:var(--green);color:#fff}
+  .pbtn.primary.done{background:#0c6f4f}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:1080px){.board.b5{grid-template-columns:repeat(3,1fr)}.board.b4{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;flex-direction:row;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px}
+    .nav{flex-direction:row;flex-wrap:wrap;margin-top:0;gap:4px}
+    .side .foot{display:none}
+    .grid2{grid-template-columns:1fr}
+    .acards{grid-template-columns:1fr}
+    .board{grid-template-columns:1fr!important}
+    .main{padding:18px 16px 60px}
+    .cal{grid-template-columns:44px repeat(3,1fr);gap:5px}
+    .acell{min-height:66px;padding:7px 8px}
+    .acell .hk{font-size:11px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ===== sidebar ===== -->
+  <aside class="side">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="nav">
+      <a data-go="briefing" class="active"><span class="ic">▣</span> Briefing</a>
+      <a data-go="pipeline"><span class="ic">⇅</span> Lead Pipeline</a>
+      <a data-go="meetings"><span class="ic">◷</span> Meetings</a>
+      <a data-go="artefacts"><span class="ic">✎</span> Artefacts</a>
+    </nav>
+    <div class="foot">Prototype · click anything.<br><b>Goal:</b> 50 booked calls.</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ============ BRIEFING ============ -->
+    <section class="view show" id="v-briefing">
+      <div class="top">
+        <div><h1>Good morning, Adam 👋</h1><div class="sub">Here's who needs you and how the campaign's moving.</div></div>
+        <div class="countdown"><b>35</b><span>days to dinner · Jul 21</span></div>
+      </div>
+
+      <section class="card hero">
+        <h2>⚑ Waiting on you <span class="cnt">4</span></h2>
+        <div id="waitlist"></div>
+      </section>
+
+      <div class="grid2">
+        <section class="card">
+          <h2>Campaign funnel <span class="tag">outbound + inbound</span></h2>
+          <div class="funnel" id="funnel">
+            <div class="frow" data-stage="all"><div class="name">Contacted</div><div class="bar"><i data-w="100%">212</i></div></div>
+            <div class="frow" data-stage="connected"><div class="name">Connected / Engaged</div><div class="bar"><i data-w="58%">124</i></div></div>
+            <div class="frow" data-stage="replied"><div class="name">Replied / Signed up</div><div class="bar"><i data-w="33%">69</i></div></div>
+            <div class="frow" data-stage="booked"><div class="name">Booked</div><div class="bar"><i data-w="21%">23</i></div></div>
+          </div>
+          <div class="splitc">
+            <div class="chip"><div class="t"><span class="sq" style="background:#4f46e5"></span> Outbound booked</div><div class="v">14</div></div>
+            <div class="chip"><div class="t"><span class="sq" style="background:#0f9d6e"></span> Inbound booked</div><div class="v">9</div></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Next meetings <span class="tag">with Adam</span></h2>
+          <div class="mtg" data-go="meetings"><div class="dchip"><b>17</b><span>Jun</span></div><div class="info"><b>Rajesh Kumar — Vantage Health</b><small>Intro call · outbound</small></div><div class="time">10:30</div></div>
+          <div class="mtg" data-go="meetings"><div class="dchip"><b>17</b><span>Jun</span></div><div class="info"><b>Sofia Marchetti — Brightline</b><small>Event walkthrough · inbound</small></div><div class="time">14:00</div></div>
+          <div class="mtg" data-go="meetings"><div class="dchip"><b>18</b><span>Jun</span></div><div class="info"><b>Derek Cho — Northwind</b><small>Intro call · outbound</small></div><div class="time">09:15</div></div>
+          <div class="mtg" data-go="meetings"><div class="dchip"><b>19</b><span>Jun</span></div><div class="info"><b>Anita Patel — Meridian Bank</b><small>Intro call · inbound</small></div><div class="time">11:00</div></div>
+        </section>
+      </div>
+
+      <section class="card arts">
+        <h2>Week 1 artefacts <span class="tag">LinkedIn · 3× / week →</span></h2>
+        <div class="acards">
+          <div class="acard" data-post="0"><div class="d">MON 22</div><p>"In 2026, product discovery increasingly happens inside AI search before a buyer reaches your site…"</p><span class="st st-draft">✎ Draft · needs review</span></div>
+          <div class="acard" data-post="1"><div class="d">WED 24</div><p>"Traffic to retail sites from AI tools grew 693% from last year. Mind-blowing right?…"</p><span class="st st-draft">✎ Draft · needs review</span></div>
+          <div class="acard" data-post="2"><div class="d">FRI 26</div><p>"In case you missed it, I'm hosting a dinner in NYC next month for ecommerce tech leaders…"</p><span class="st st-draft">✎ Draft · needs review</span></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ============ PIPELINE ============ -->
+    <section class="view" id="v-pipeline">
+      <h1>Lead Pipeline</h1>
+      <div class="sub" style="margin-bottom:18px">Leads move left → right on their own as Dripify &amp; Calendly update. Click a card for the timeline.</div>
+      <div class="controls">
+        <div class="seg" id="chan">
+          <button class="on" data-chan="out">Outbound <span class="ct">200</span></button>
+          <button data-chan="in">Inbound <span class="ct">28</span></button>
+        </div>
+        <input class="search" placeholder="🔍  Search by name or company…">
+        <div class="vtoggle" id="vtog"><button class="on" data-v="board">▦ Board</button><button data-v="table">▤ Table</button></div>
+      </div>
+      <div id="boardWrap"></div>
+      <div id="tableWrap" style="display:none"></div>
+    </section>
+
+    <!-- ============ MEETINGS ============ -->
+    <section class="view" id="v-meetings">
+      <div class="narrow">
+        <div class="top"><div><h1>Meetings</h1><div class="sub">Booked calls with Adam — nothing else.</div></div></div>
+        <section class="card">
+          <h2>Upcoming <span class="cnt">5</span></h2>
+          <div class="day">Tue · Jul 17</div>
+          <div class="mrow" data-lead="Rajesh Kumar"><div class="time">10:30</div><div class="who"><span class="wname">Rajesh Kumar <span class="ext">↗</span></span><div class="role">CTO · Acme Cloud</div></div><span class="pill out">OUT</span></div>
+          <div class="mrow" data-lead="Sofia Marlow"><div class="time">14:00</div><div class="who"><span class="wname">Sofia Marlow <span class="ext">↗</span></span><div class="role">CIO · Beacon Health</div></div><span class="pill in">IN</span></div>
+          <div class="day">Wed · Jul 18</div>
+          <div class="mrow" data-lead="Derek Cho"><div class="time">09:15</div><div class="who"><span class="wname">Derek Cho <span class="ext">↗</span></span><div class="role">CTO · Northwind Logistics</div></div><span class="pill out">OUT</span></div>
+          <div class="mrow" data-lead="Anita Patel"><div class="time">11:00</div><div class="who"><span class="wname">Anita Patel <span class="ext">↗</span></span><div class="role">CIO · Meridian Bank</div></div><span class="pill in">IN</span></div>
+          <div class="day">Fri · Jul 20</div>
+          <div class="mrow" data-lead="Marcus Vale"><div class="time">15:30</div><div class="who"><span class="wname">Marcus Vale <span class="ext">↗</span></span><div class="role">CTO · Halcyon Media</div></div><span class="pill out">OUT</span></div>
+        </section>
+        <details class="past card">
+          <summary><h2>Past <span class="cnt muted">18</span><span class="chev">▶</span></h2></summary>
+          <div class="day">Mon · Jul 14</div>
+          <div class="mrow muted" data-lead="Priya Nair"><div class="time">11:00</div><div class="who"><span class="wname">Priya Nair <span class="ext">↗</span></span><div class="role">CIO · Vela Energy</div></div><span class="pill in">IN</span></div>
+          <div class="mrow muted cancelled" data-lead="Tom Wells"><div class="time">15:30</div><div class="who"><span class="wname">Tom Wells <span class="ext">↗</span></span><div class="role">CTO · Brightline</div></div><span class="tag-cancel">CANCELLED</span><span class="pill out">OUT</span></div>
+          <div class="day">Fri · Jul 11</div>
+          <div class="mrow muted" data-lead="Elena Sousa"><div class="time">10:00</div><div class="who"><span class="wname">Elena Sousa <span class="ext">↗</span></span><div class="role">CTO · Vantage Health</div></div><span class="pill out">OUT</span></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ ARTEFACTS ============ -->
+    <section class="view" id="v-artefacts">
+      <div class="top">
+        <div><h1>Artefacts — content calendar</h1><div class="sub">The whole campaign on one surface. Click any post to read, edit, or approve.</div></div>
+        <div class="countdown"><b id="artCount">6</b><span>posts drafted · 3× / week</span></div>
+      </div>
+      <section class="card" style="padding:18px">
+        <div class="cal" id="cal"></div>
+        <div class="legend">
+          <span><span class="abadge st-live">LIVE</span> posted</span>
+          <span><span class="abadge st-sched">SCHEDULED</span> approved &amp; queued</span>
+          <span><span class="abadge st-draft">DRAFT</span> needs Adam's review</span>
+          <span style="border-left:3px solid #e8c986;padding-left:8px">amber outline = waiting on you</span>
+        </div>
+      </section>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===== lead detail drawer ===== -->
+<div class="overlay" id="leadOverlay">
+  <div class="drawer">
+    <div class="dh"><span class="ttl">Lead detail</span><button class="x" data-close>✕</button></div>
+    <div class="pad" id="leadBody"></div>
+  </div>
+</div>
+
+<!-- ===== post panel ===== -->
+<div class="overlay" id="postOverlay">
+  <div class="ppanel" id="postPanel"></div>
+</div>
+
+<script>
+/* ---------- view switching ---------- */
+const views = ['briefing','pipeline','meetings','artefacts'];
+function go(name){
+  views.forEach(v=>document.getElementById('v-'+v).classList.toggle('show', v===name));
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('active', a.dataset.go===name));
+  document.querySelector('.main').scrollTo?.(0,0); window.scrollTo(0,0);
+  if(name==='briefing') animateFunnel();
+}
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();go(el.dataset.go)}));
+
+/* funnel bars animate on view */
+function animateFunnel(){
+  document.querySelectorAll('#funnel .bar i').forEach((i,idx)=>{
+    i.style.width='0'; setTimeout(()=>i.style.width=i.dataset.w, 80+idx*90);
+  });
+}
+document.querySelectorAll('#funnel .frow').forEach(r=>r.addEventListener('click',()=>go('pipeline')));
+
+/* ---------- WAITING ON YOU ---------- */
+const waiting=[
+  {n:'Derek Cho',init:'DC',role:'CTO · Northwind Logistics',ch:'out',ago:'12m'},
+  {n:'Anita Patel',init:'AP',role:'CIO · Meridian Bank',ch:'in',ago:'40m'},
+  {n:'Thomas Wells',init:'TW',role:'CTO · Halcyon Media',ch:'out',ago:'2h'},
+  {n:'Carla Mendes',init:'CM',role:'CIO · Vela Energy',ch:'in',ago:'5h'},
+];
+document.getElementById('waitlist').innerHTML=waiting.map(w=>`
+  <div class="wrow" data-lead="${w.n}">
+    <div class="av">${w.init}</div>
+    <div class="who"><span class="wname">${w.n} <span class="ext">↗</span></span><div class="role">${w.role}</div></div>
+    <span class="pill ${w.ch}">${w.ch.toUpperCase()}</span><div class="ago">${w.ago}</div>
+  </div>`).join('');
+
+/* ---------- PIPELINE ---------- */
+const boards={
+  out:[
+    {t:'Connection Sent',led:'#94a3b8',ct:62,cls:'',cards:[
+      {n:'Marcus Feld',ro:'CTO · Tessellate AI'},{n:'Hiro Tanaka',ro:'CTO · Kanso Robotics'},{n:'Priya Nair',ro:'CIO · Solstice Group'}],more:'+ 59 more'},
+    {t:'Connected',led:'#3b6bd6',ct:48,cls:'',cards:[
+      {n:'Lena Gruber',ro:'CIO · Apex Manufacturing'},{n:'Owen Brady',ro:'CTO · Linnet Fintech'}],more:'+ 46 more'},
+    {t:'Message Sent',led:'#c97a12',ct:53,cls:'',cards:[
+      {n:'Yusuf Demir',ro:'CTO · Aster Cloud'},{n:'Grace Okoro',ro:'CIO · Pell & Rowe'},{n:'Ben Carter',ro:'CTO · Madrona Soft'}],more:'+ 50 more'},
+    {t:'Replied',led:'#d23f6b',ct:23,cls:'replied',cards:[
+      {n:'Derek Cho',ro:'CTO · Northwind Logistics',star:1},{n:'Thomas Wells',ro:'CTO · Halcyon Media',star:1}],more:'+ 21 more'},
+    {t:'Booked',led:'#0f9d6e',ct:14,cls:'booked',cards:[
+      {n:'Rajesh Kumar',ro:'CTO · Vantage Health',mt:'📅 Jun 17 · 10:30'},{n:'Derek Cho',ro:'CTO · Northwind Logistics',mt:'📅 Jun 18 · 09:15'}],more:'+ 12 more'},
+  ],
+  in:[
+    {t:'Signed Up',led:'#94a3b8',ct:28,cls:'',cards:[
+      {n:'Carla Mendes',ro:'CIO · Vela Energy'},{n:'Sofia Marchetti',ro:'COO · Brightline'},{n:'Devon Park',ro:'CTO · Lumen Retail'}],more:'+ 14 more'},
+    {t:'Emailed',led:'#c97a12',ct:19,cls:'',cards:[
+      {n:'Nadia Rahman',ro:'CIO · Forth Health'},{n:'Eli Stein',ro:'CTO · Wavelength'}],more:'+ 16 more'},
+    {t:'Replied',led:'#d23f6b',ct:11,cls:'replied',cards:[
+      {n:'Anita Patel',ro:'CIO · Meridian Bank',star:1}],more:'+ 10 more'},
+    {t:'Booked',led:'#0f9d6e',ct:9,cls:'booked',cards:[
+      {n:'Sofia Marlow',ro:'CIO · Beacon Health',mt:'📅 Jul 17 · 14:00'}],more:'+ 8 more'},
+  ]
+};
+let curChan='out';
+function renderBoard(){
+  const cols=boards[curChan];
+  document.getElementById('boardWrap').innerHTML=
+    `<div class="board ${curChan==='out'?'b5':'b4'}" style="grid-template-columns:repeat(${cols.length},1fr)">`+
+    cols.map(c=>`
+      <div class="col ${c.cls}">
+        <div class="col-h"><div class="t"><span class="led" style="background:${c.led}"></span> ${c.t}</div><span class="ct">${c.ct}</span></div>
+        <div class="cards">
+          ${c.cards.map(l=>`<div class="lc" data-lead="${l.n}"><span class="lcn">${l.n} <span class="ext">↗</span></span>
+            <div class="ro">${l.ro} ${l.star?'<span class="star">★ waiting on Adam</span>':''}</div>
+            ${l.mt?`<div class="mt">${l.mt}</div>`:''}</div>`).join('')}
+          <div class="more">${c.more}</div>
+        </div>
+      </div>`).join('')+`</div>`;
+  // table
+  const rows=cols.flatMap(c=>c.cards.map(l=>({...l,stage:c.t,cls:c.cls})));
+  document.getElementById('tableWrap').innerHTML=
+    `<table class="ptable"><thead><tr><th>Lead</th><th>Title</th><th>Company</th><th>Stage</th></tr></thead><tbody>`+
+    rows.map(l=>{const [title,company]=l.ro.split(' · ');return `<tr data-lead="${l.n}">
+      <td class="nm">${l.n} <span class="ext">↗</span></td><td>${title}</td><td>${company||''}</td>
+      <td><span class="stagebadge ${l.cls}">${l.stage}</span></td></tr>`}).join('')+`</tbody></table>`;
+  bindLeads();
+}
+document.querySelectorAll('#chan button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#chan button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  curChan=b.dataset.chan; renderBoard();
+}));
+document.querySelectorAll('#vtog button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#vtog button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  const v=b.dataset.v;
+  document.getElementById('boardWrap').style.display=v==='board'?'':'none';
+  document.getElementById('tableWrap').style.display=v==='table'?'':'none';
+}));
+
+/* ---------- LEAD DRAWER ---------- */
+const leadDB={
+  'Derek Cho':{init:'DC',ro:'CTO · Northwind Logistics',ch:'out',stage:'★ Replied — waiting on Adam',
+    li:'linkedin.com/in/derek-cho',em:'derek.cho@northwind.com',
+    meet:{when:'Wed, Jun 18 · 09:15',via:'using derek.personal@gmail.com'},
+    tl:[['done','Connection sent','Jun 11 · 9:02 AM'],['done','Connected','Jun 12 · 4:31 PM'],['done','Message sent','Jun 12 · 4:45 PM'],['now','Replied','Jun 16 · 8:40 AM · waiting on Adam'],['future','Booked','—']]},
+};
+function leadCard(name){
+  const d=leadDB[name]||{init:name.split(' ').map(s=>s[0]).join('').slice(0,2),ro:'CTO · —',ch:'out',stage:'In pipeline',li:'linkedin.com/in/'+name.toLowerCase().replace(/ /g,'-'),em:name.split(' ')[0].toLowerCase()+'@company.com',tl:[['done','Connection sent','—'],['now','In progress','—'],['future','Booked','—']]};
+  const chBadge=d.ch==='in'?'<span class="dbadge b-in">INBOUND</span>':'<span class="dbadge b-out">OUTBOUND</span>';
+  return `
+    <div class="lead-h"><div class="av">${d.init}</div>
+      <div><div class="nm"><a href="#">${name} <span class="ext">↗</span></a></div><div class="ro">${d.ro}</div>
+      <div class="badges">${chBadge}<span class="dbadge b-stage">${d.stage}</span></div></div></div>
+    <div class="blk"><div class="blk-h">Contact</div><div class="contact">
+      <div class="crow"><span class="ic">🔗</span><span class="lab">LinkedIn</span><span class="val">${d.li}</span><span class="act">Open ↗</span></div>
+      <div class="crow"><span class="ic">✉️</span><span class="lab">Email</span><span class="val">${d.em}</span><span class="act">Copy</span></div>
+    </div></div>
+    ${d.meet?`<div class="blk"><div class="blk-h">Meeting</div><div class="meet"><div class="cal2">📅</div>
+      <div><b>${d.meet.when}</b><small>Booked via Calendly · ${d.meet.via}</small></div></div></div>`:''}
+    <div class="blk"><div class="blk-h">Timeline</div><div class="tl">
+      ${d.tl.map(t=>`<div class="ti ${t[0]==='future'?'future':''}"><div class="tdot ${t[0]}">${t[0]==='done'?'✓':t[0]==='now'?'●':'○'}</div>
+        <div><div class="lab">${t[1]}</div><div class="tm">${t[2]}</div></div></div>`).join('')}
+    </div></div>
+    <div class="blk"><div class="blk-h">Manage (manual override)</div>
+      <div class="actions"><button class="abtn">↔ Move stage</button><button class="abtn">⊘ Mark cancelled</button><button class="abtn">⛬ Merge duplicate</button></div>
+      <div class="notes"><textarea placeholder="Internal notes — e.g. 'asked to reschedule', 'knows Adam from SaaStr'…"></textarea></div>
+    </div>`;
+}
+function openLead(name){document.getElementById('leadBody').innerHTML=leadCard(name);document.getElementById('leadOverlay').classList.add('open');}
+function bindLeads(){
+  document.querySelectorAll('[data-lead]').forEach(el=>{el.onclick=()=>openLead(el.dataset.lead);});
+}
+
+/* ---------- ARTEFACTS ---------- */
+const DEFAULT_POSTS=[
+  {day:'MON',date:'Jun 22',hook:'The binary AI-ready question',status:'draft',note:'Educational · campaign opener',
+    body:`In 2026, the moment of product discovery increasingly happens inside AI search, conversational commerce, and LLM-powered assistants before a buyer ever reaches your site.
+
+There is now a binary question every ecommerce technology leader needs to answer: Can these AI experiences expose your products to this new buyer journey, or can't they?
+
+If the answer is "not yet," your ecommerce business is not ready for the discovery platforms that are reshaping how buyers find products.
+
+If you want to dive deeper on this topic, I'll be hosting a dinner with tech executives in ecommerce in NYC.
+
+Check the link to join a small, vetted group of fellow ecommerce technology decision makers for a candid conversation about what "AI-ready" really means and what you can do this quarter to close the gap.`},
+  {day:'WED',date:'Jun 24',hook:'Adobe study: AI traffic +693%',status:'draft',note:'Study · data-led hook',
+    body:`Traffic to retail sites from AI tools like ChatGPT, Gemini and Perplexity grew 693% from last year.
+
+Mind-blowing right?
+
+What is even more astonishing is that the shoppers arriving from AI tools convert 31% more than any other source and spend 45% more time on site.
+
+But not all ecommerce teams are capturing this value equally. The companies capturing this incremental traffic have invested in an AI forward tech stack and data infrastructure.
+
+The CTO's and CIO's who are staying on top of the latest technology developments are the ones winning in this new product discovery era.
+
+P.S If you want to dive deeper on this topic, I'll be hosting a dinner with tech executives in ecommerce in NYC.
+
+Check the link to join a small, vetted group of fellow ecommerce technology decision makers for a candid conversation about what "AI-ready" really means and what you can do this quarter to close the gap.`},
+  {day:'FRI',date:'Jun 26',hook:'Dinner invite — direct CTA',status:'draft',note:'Direct CTA',
+    body:`In case you missed it, I'm hosting a dinner in NYC next month for ecommerce technology leaders.
+
+The premise is simple: Product discovery is moving into AI search and LLM assistants, and most teams have not mapped what it takes to stay visible there.
+
+So, I'm putting together a group of 10-15 CTO's and CIO's in the ecommerce space to have a candid conversation about the future of the buyer's journey and what it means to be "AI-ready".
+
+Drop your email in the link here and I'll send you more details:`},
+  {day:'MON',date:'Jun 29',hook:"AI-ready isn't a chatbot",status:'draft',note:'Educational · myth-bust',
+    body:`When most ecommerce tech teams hear "AI-ready," they start scoping a chatbot for their site.
+
+While it is a form of progress, I do think that it's solving the wrong problem.
+
+The AI that decides whether buyers find you lives in ChatGPT, Gemini, Perplexity and Google's AI overviews. It reads your product data from your feeds, your structured data, and your marketplace listings. From all of that it forms a view of what you sell, who it is for, and when to recommend it.
+
+A chatbot on your own site does nothing to change that view. By the time someone lands on your site, the assistant has already made its recommendation.
+
+So AI-readiness comes down to a question your team fully controls: when an assistant reads your catalog, can it understand your products well enough to recommend them for the right query?
+
+For a simple catalog, that is manageable. For a complex, omnichannel catalog, it's more challenging. Complex catalogs have to deal with thousands of SKUs, deep variant trees, fitment and compatibility rules, and attributes that are stored across different systems.
+
+When the search assistant reads through unstructured data, it either guesses or moves on to a competitor it understands better, ultimately hurting your discoverability.
+
+So, is a chatbot helpful in the age of AI? Perhaps!
+
+But, if I were a leader in an ecommerce company, I would spend extra time on the new AI buyer journey and the requisite data layer to get the product catalog recommended.
+
+P.S This is exactly what I'll be discussing over dinner with a group of CTO's and CIO's next month in NYC.
+
+If you want to dive deeper on this topic, check the link to join a small, vetted group of fellow ecommerce technology decision makers for a candid conversation about what "AI-ready" really means and what you can do this quarter to close the gap.`},
+  {day:'WED',date:'Jul 01',hook:'Study: bad product data breaks trust',status:'draft',note:'Study',
+    body:`73% of B2B ecommerce buyers say inaccurate product content damages their trust in a brand.
+
+For years that was a storefront or customer experience problem (a wrong image, a broken link, or an unintuitive website design).
+
+But in the age of AI, I see this mainly as a discoverability problem.
+
+When an AI assistant recommends products, it leans on your platform data to decide what fits a buyer's request. If your specs are wrong, missing or inconsistent, one of two things will happen.
+
+Either the assistant will skip your product because it cannot confirm the details. Or it will recommend the wrong product for the searched use case.
+
+Either way the buyer loses trust, and so does the assistant that recommended you. Next time, it will route around you.
+
+Although this sounds trivial, making the wrong product recommendation is widespread. I just came across a 2025 survey from McKinsey that cited inaccurate product recommendations as the most experienced issue with AI search.
+
+This inaccuracy is even more pronounced in a complex, omnichannel catalog. One missing attribute here, one inconsistent unit of measure there, or one spec that disagrees between your site and your marketplace feed, can all cause inaccurate product recommendations.
+
+Auditing your product data is only one facet of what being "AI ready" means for ecommerce companies.
+
+If you want to dive deeper on this topic, I'll be hosting a dinner with tech executives in ecommerce in NYC.
+
+Check the link to join a small, vetted group of fellow technology decision makers for a candid conversation about the future of AI in ecommerce:`},
+  {day:'FRI',date:'Jul 03',hook:'Dinner invite — the agenda',status:'draft',note:'Direct CTA',
+    body:`LinkedIn connections, I'm bringing together 10 to 15 CTOs and CIOs in the ecommerce space for a private executive dinner in NYC next month.
+
+A few topics we plan on discussing:
+
+• What does "AI-ready" mean for a catalog as complex as yours?
+• Where are buyers already discovering products through AI, and where is it still hype?
+• What can you realistically fix this quarter, and what belongs on a longer roadmap?
+• How are peers measuring whether AI even sees their products today?
+
+If you are a CTO/CIO of an ecommerce company with a complex catalog or you know someone who is, check the link below:`},
+  {day:'MON',date:'Jul 06',hook:null,status:'empty'},
+  {day:'WED',date:'Jul 08',hook:null,status:'empty'},
+  {day:'FRI',date:'Jul 10',hook:null,status:'empty'},
+  {day:'MON',date:'Jul 13',hook:null,status:'empty'},
+  {day:'WED',date:'Jul 15',hook:null,status:'empty'},
+  {day:'FRI',date:'Jul 17',hook:null,status:'empty'},
+];
+const STBADGE={live:'<span class="abadge st-live">LIVE</span>',sched:'<span class="abadge st-sched">SCHEDULED</span>',draft:'<span class="abadge st-draft">DRAFT</span>'};
+const weeks=['Jun 22','Jun 29','Jul 06','Jul 13'];
+
+/* every drafted post starts with a SAWA "drafted" log entry + un-reviewed */
+DEFAULT_POSTS.forEach(p=>{ if(p.status!=='empty'){ p.reviewed=false; p.log=[{a:'Drafted by SAWA',t:'Jun 14 · 10:12am'}]; } });
+
+/* current timestamp for the activity log, e.g. "Jun 16 · 3:42pm" */
+function stamp(){
+  const d=new Date(), mo=d.toLocaleString('en-US',{month:'short'});
+  let h=d.getHours(); const ap=h>=12?'pm':'am'; h=h%12||12;
+  return `${mo} ${d.getDate()} · ${h}:${String(d.getMinutes()).padStart(2,'0')}${ap}`;
+}
+
+/* ---- load saved edits (persisted in the browser) ---- */
+const STORE_KEY='sawa-artefacts-v2';
+let posts=JSON.parse(JSON.stringify(DEFAULT_POSTS));
+function loadSaved(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
+    Object.keys(saved).forEach(i=>{posts[i]&&Object.assign(posts[i],saved[i]);});
+  }catch(e){}
+}
+function persist(){
+  const diff={};
+  posts.forEach((p,i)=>{
+    const d=DEFAULT_POSTS[i]||{};
+    if(p.body!==d.body||p.status!==d.status||p.hook!==d.hook||p.reviewed||(p.log&&p.log.length>1))
+      diff[i]={body:p.body,status:p.status,hook:p.hook,note:p.note,reviewed:p.reviewed,log:p.log};
+  });
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(diff));}catch(e){}
+}
+loadSaved();
+function renderCal(){
+  let html=`<div class="colhdr" style="grid-column:1"></div><div class="colhdr">Mon</div><div class="colhdr">Wed</div><div class="colhdr">Fri</div>`;
+  weeks.forEach((wk,wi)=>{
+    html+=`<div class="wklbl">${wk}</div>`;
+    for(let c=0;c<3;c++){
+      const idx=wi*3+c, p=posts[idx];
+      if(!p){html+=`<div class="acell empty">+ add</div>`;continue;}
+      if(p.status==='empty'){html+=`<div class="acell empty" data-post="${idx}">+ add post</div>`;continue;}
+      const dnum=p.date.split(' ')[1];
+      html+=`<div class="acell ${p.status==='draft'?'draft':''}" data-post="${idx}">
+        <div class="dnum">${p.day} ${dnum}</div><div class="hk">${p.hook}</div>${STBADGE[p.status]}</div>`;
+    }
+  });
+  document.getElementById('cal').innerHTML=html;
+  document.querySelectorAll('#cal [data-post]').forEach(el=>el.onclick=()=>openPost(+el.dataset.post));
+  const ac=document.getElementById('artCount');
+  if(ac)ac.textContent=posts.filter(p=>p.status!=='empty').length;
+}
+let curPost=0;
+function openPost(i){curPost=i;renderPost();document.getElementById('postOverlay').classList.add('open');}
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function logHTML(p){
+  if(!p.log||!p.log.length)return '';
+  return `<div class="field-lbl" style="margin-top:16px">Activity log</div>
+    <div class="pp-log">${p.log.map(e=>`<div class="logrow ${e.review?'review':''}"><span class="logdot"></span>
+      <div style="flex:1"><b>${e.a}</b></div><span class="logt">${e.t}</span></div>`).join('')}</div>`;
+}
+function renderPost(){
+  const p=posts[curPost];
+  const reviewed=!!p.reviewed||p.status==='sched'||p.status==='live';
+  const label={live:'LIVE',sched:'SCHEDULED',draft:'DRAFT',empty:'NO DRAFT'}[p.status];
+  const badgeCls={live:'st-live',sched:'st-sched',draft:'st-draft',empty:'st-draft'}[p.status];
+  let bodyHTML;
+  if(p.status==='empty'){
+    bodyHTML=`<div class="pp-empty"><div class="big">✎</div><div>No draft for <b>${p.day} ${p.date}</b> yet.</div>
+      <button class="pbtn primary" id="startDraft" style="margin-top:6px">+ Draft this post</button></div>`;
+  }else{
+    bodyHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div class="field-lbl" style="margin-bottom:0">Post body — click to edit, then Save</div>
+        ${reviewed?'<span class="reviewed-flag">✓ Reviewed by Adam</span>':''}</div>
+      <div class="post-text" id="postEditor" contenteditable="true" style="margin-top:7px">${esc(p.body).replace(/\n/g,'<br>')}</div>
+      ${p.note?`<div class="pp-note">📝 SAWA note: ${p.note}</div>`:''}
+      ${logHTML(p)}`;
+  }
+  document.getElementById('postPanel').innerHTML=`
+    <div class="pp-top">
+      <div><div class="hk">${p.hook||'Untitled post'}</div><div class="meta">${p.day} · ${p.date} · LinkedIn</div></div>
+      <div style="display:flex;gap:10px;align-items:center"><span class="abadge ${badgeCls}">${label}</span><button class="x" data-close>✕</button></div>
+    </div>
+    <div class="pp-body">${bodyHTML}</div>
+    <div class="pp-foot">
+      <div class="walk"><span class="arrow" id="prevP">‹</span> ${curPost+1} of ${posts.length} <span class="arrow" id="nextP">›</span></div>
+      ${p.status!=='empty'?`<div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span id="saveState" style="font-size:11.5px;color:var(--muted)"></span>
+        <button class="pbtn" id="saveBtn">Save</button>
+        <button class="pbtn primary ${reviewed?'done':''}" id="reviewBtn">${reviewed?'✓ Reviewed · Scheduled':'✓ Good to go live'}</button></div>`:''}
+    </div>`;
+  document.querySelectorAll('#postPanel [data-close]').forEach(b=>b.onclick=closeOverlays);
+  const prev=document.getElementById('prevP'),next=document.getElementById('nextP');
+  if(prev)prev.onclick=()=>{curPost=(curPost-1+posts.length)%posts.length;renderPost();};
+  if(next)next.onclick=()=>{curPost=(curPost+1)%posts.length;renderPost();};
+  // ----- editing + save (persists + logs the edit) -----
+  const editor=document.getElementById('postEditor'),saveBtn=document.getElementById('saveBtn'),saveState=document.getElementById('saveState');
+  if(editor&&saveBtn){
+    editor.addEventListener('input',()=>{saveBtn.classList.add('primary');saveState.textContent='Unsaved changes';});
+    saveBtn.onclick=()=>{
+      const nb=editor.innerText.replace(/\n{3,}/g,'\n\n').trim();
+      if(nb!==posts[curPost].body){
+        posts[curPost].body=nb;
+        posts[curPost].log.push({a:'Edited by Adam',t:stamp()});
+      }
+      persist();renderCal();renderPost();
+      const ss=document.getElementById('saveState'); if(ss)ss.textContent='Saved ✓';
+    };
+  }
+  // ----- review → schedule (Adam's sign-off, logged) -----
+  const rb=document.getElementById('reviewBtn');
+  if(rb&&!reviewed)rb.onclick=()=>{
+    posts[curPost].reviewed=true;
+    posts[curPost].status='sched';
+    posts[curPost].log.push({a:'Reviewed by Adam — good to go live',t:stamp(),review:true});
+    persist();renderCal();renderPost();
+  };
+  const sd=document.getElementById('startDraft');
+  if(sd)sd.onclick=()=>{posts[curPost].status='draft';posts[curPost].hook='New post';posts[curPost].body='';posts[curPost].note='';posts[curPost].reviewed=false;posts[curPost].log=[{a:'Draft started by Adam',t:stamp()}];persist();renderCal();renderPost();};
+}
+document.querySelectorAll('.acard[data-post]').forEach(el=>el.onclick=()=>openPost(+el.dataset.post));
+
+/* ---------- overlay close ---------- */
+function closeOverlays(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'));}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeOverlays);
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeOverlays();}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlays();});
+
+/* ---------- init ---------- */
+renderBoard();renderCal();bindLeads();animateFunnel();
+</script>
+</body>
+</html>

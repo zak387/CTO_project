@@ -1,0 +1,48 @@
+// SAWA Command Center — data model (see SPEC.md §6)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// One record per person.
+model Lead {
+  id            Int      @id @default(autoincrement())
+  name          String
+  title         String
+  company       String
+  linkedinUrl   String?  @unique
+  email         String?
+  channel       String   // "outbound" | "inbound" | "both"
+  stage         String   // see stage lists in SPEC.md §2
+  emailSuppressed Boolean @default(false)
+  notes         String?
+
+  // meeting (only once booked)
+  meetingAt     DateTime?
+  meetingEmail  String?
+
+  events        Event[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// The timeline — one row per thing that happened.
+model Event {
+  id        Int      @id @default(autoincrement())
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId    Int
+  type      String   // connection_sent | connected | message_sent | replied | signed_up | emailed | booked | cancelled
+  at        DateTime @default(now())
+}
+
+// Items the Reconciliation Queue couldn't place with certainty.
+model ReviewItem {
+  id        Int      @id @default(autoincrement())
+  reason    String   // human-readable: "Booking might be Anita at Meridian"
+  payload   String   // raw JSON of the incoming event
+  createdAt DateTime @default(now())
+}

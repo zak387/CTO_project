@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWA Command — Briefing Home (v2)</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#0f1729; --muted:#5b6678; --line:#e6e9ef;
+    --accent:#4f46e5; --accent-soft:#eef0fe; --green:#0f9d6e;
+    --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06); --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  /* sidebar */
+  .side{background:#0f1729;color:#cdd5e3;padding:22px 16px;position:sticky;top:0;height:100vh}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:15px}
+  .brand .dot{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:grid;place-items:center;font-size:13px}
+  .brand small{display:block;font-weight:500;color:#7b88a1;font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:3px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#aab4c8;text-decoration:none;font-size:13.5px;font-weight:500;cursor:pointer}
+  .nav a.active{background:rgba(99,102,241,.16);color:#fff}
+  .nav a:hover:not(.active){background:rgba(255,255,255,.05);color:#fff}
+  .nav .ic{width:17px;text-align:center}
+  /* main */
+  .main{padding:24px 30px 60px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  h1{font-size:21px;letter-spacing:-.4px}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px}
+  .countdown{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 16px;box-shadow:var(--shadow);text-align:center;white-space:nowrap}
+  .countdown b{font-size:20px;color:var(--accent);line-height:1} .countdown span{font-size:11px;color:var(--muted);margin-left:6px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .card h2{font-size:14px;padding:15px 18px 11px;display:flex;align-items:center;justify-content:space-between}
+  .card h2 .tag{font-size:11px;color:var(--muted);font-weight:500}
+  .cnt{background:var(--accent);color:#fff;font-size:12px;font-weight:700;border-radius:20px;padding:1px 9px;margin-left:8px}
+  /* hero */
+  .hero{margin-bottom:18px;border:1px solid #dcdcff}
+  .hero h2{background:linear-gradient(90deg,#f3f2ff,#fff);border-bottom:1px solid var(--line)}
+  .wrow{display:flex;align-items:center;gap:13px;padding:13px 18px;border-top:1px solid var(--line)}
+  .wrow:first-of-type{border-top:none}
+  .wrow:hover{background:#fafaff}
+  .av{width:38px;height:38px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+  .wrow .who{flex:1;min-width:0}
+  .wname{font-size:14.5px;font-weight:600;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .wname:hover{color:var(--accent);text-decoration:underline}
+  .wname .ext{font-size:11px;opacity:.6}
+  .wrow .role{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .pill{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px}
+  .pill.out{background:#eef0fe;color:#4f46e5}.pill.in{background:#e6f7f0;color:#0f9d6e}
+  .ago{font-size:12px;color:var(--muted);width:54px;text-align:right;flex-shrink:0}
+  /* grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .funnel{padding:6px 18px 14px}
+  .frow{display:flex;align-items:center;gap:12px;margin:9px 0}
+  .frow .name{width:140px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .bar{flex:1;height:28px;border-radius:8px;background:var(--accent-soft);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0;width:var(--w);background:linear-gradient(90deg,#6366f1,#4f46e5);border-radius:8px;display:flex;align-items:center;padding-left:11px;color:#fff;font-size:12px;font-weight:700}
+  .split{display:flex;gap:8px;padding:4px 18px 16px}
+  .chip{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .chip .t{font-size:11px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+  .chip .v{font-size:17px;font-weight:700;margin-top:2px}
+  .sq{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .mtg{display:flex;gap:12px;padding:11px 18px;border-top:1px solid var(--line);align-items:center}
+  .mtg:first-of-type{border-top:none}
+  .dchip{width:48px;text-align:center;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:5px 0;flex-shrink:0}
+  .dchip b{display:block;font-size:15px;line-height:1}.dchip span{font-size:10px;color:var(--muted);text-transform:uppercase}
+  .mtg .info{flex:1}.mtg .info b{font-size:13px}.mtg .info small{display:block;color:var(--muted);font-size:11.5px}
+  .mtg .time{font-size:12.5px;font-weight:700;color:var(--accent)}
+  /* artefacts */
+  .arts{margin-top:18px}
+  .acards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:6px 18px 18px}
+  .acard{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px}
+  .acard .d{font-size:11px;font-weight:700;color:var(--muted)}
+  .acard p{font-size:12.5px;color:#33405a;margin:7px 0 9px;line-height:1.45}
+  .st{font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px}
+  .st-live{background:#e6f7f0;color:#0f9d6e}.st-sched{background:#eef0fe;color:#4f46e5}.st-draft{background:#fdf3e3;color:#d98a00}
+  @media(max-width:900px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px}
+    .nav{flex-direction:row;flex-wrap:wrap;margin-top:0;gap:4px}
+    .grid{grid-template-columns:1fr}
+    .acards{grid-template-columns:1fr}
+    .main{padding:18px 16px 50px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><span class="dot">◆</span><div>SAWA Command<small>NY CTO Dinner</small></div></div>
+    <nav class="nav">
+      <a class="active"><span class="ic">▣</span> Briefing</a>
+      <a><span class="ic">⇅</span> Lead Pipeline</a>
+      <a><span class="ic">◷</span> Meetings</a>
+      <a><span class="ic">✎</span> Artefacts</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1>Good morning, Adam 👋</h1><div class="sub">Here's who needs you and how the campaign's moving.</div></div>
+      <div class="countdown"><b>35</b><span>days to dinner · Jul 21</span></div>
+    </div>
+
+    <!-- HERO -->
+    <section class="card hero">
+      <h2>⚑ Waiting on you <span class="cnt">4</span></h2>
+      <div class="wrow">
+        <div class="av">DC</div>
+        <div class="who"><a class="wname" href="#">Derek Cho <span class="ext">↗</span></a><div class="role">CTO · Northwind Logistics</div></div>
+        <span class="pill out">OUT</span><div class="ago">12m</div>
+      </div>
+      <div class="wrow">
+        <div class="av">AP</div>
+        <div class="who"><a class="wname" href="#">Anita Patel <span class="ext">↗</span></a><div class="role">CIO · Meridian Bank</div></div>
+        <span class="pill in">IN</span><div class="ago">40m</div>
+      </div>
+      <div class="wrow">
+        <div class="av">TW</div>
+        <div class="who"><a class="wname" href="#">Thomas Wells <span class="ext">↗</span></a><div class="role">CTO · Halcyon Media</div></div>
+        <span class="pill out">OUT</span><div class="ago">2h</div>
+      </div>
+      <div class="wrow">
+        <div class="av">CM</div>
+        <div class="who"><a class="wname" href="#">Carla Mendes <span class="ext">↗</span></a><div class="role">CIO · Vela Energy</div></div>
+        <span class="pill in">IN</span><div class="ago">5h</div>
+      </div>
+    </section>
+
+    <!-- FUNNEL + MEETINGS -->
+    <div class="grid">
+      <section class="card">
+        <h2>Campaign funnel <span class="tag">outbound + inbound</span></h2>
+        <div class="funnel">
+          <div class="frow"><div class="name">Contacted</div><div class="bar"><i style="--w:100%">212</i></div></div>
+          <div class="frow"><div class="name">Connected / Engaged</div><div class="bar"><i style="--w:58%">124</i></div></div>
+          <div class="frow"><div class="name">Replied / Signed up</div><div class="bar"><i style="--w:33%">69</i></div></div>
+          <div class="frow"><div class="name">Booked</div><div class="bar"><i style="--w:21%">23</i></div></div>
+        </div>
+        <div class="split">
+          <div class="chip"><div class="t"><span class="sq" style="background:#4f46e5"></span> Outbound booked</div><div class="v">14</div></div>
+          <div class="chip"><div class="t"><span class="sq" style="background:#0f9d6e"></span> Inbound booked</div><div class="v">9</div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Next meetings <span class="tag">with Adam</span></h2>
+        <div class="mtg"><div class="dchip"><b>17</b><span>Jun</span></div><div class="info"><b>Rajesh Kumar — Vantage Health</b><small>Intro call · outbound</small></div><div class="time">10:30</div></div>
+        <div class="mtg"><div class="dchip"><b>17</b><span>Jun</span></div><div class="info"><b>Sofia Marchetti — Brightline</b><small>Event walkthrough · inbound</small></div><div class="time">14:00</div></div>
+        <div class="mtg"><div class="dchip"><b>18</b><span>Jun</span></div><div class="info"><b>Derek Cho — Northwind</b><small>Intro call · outbound</small></div><div class="time">09:15</div></div>
+        <div class="mtg"><div class="dchip"><b>19</b><span>Jun</span></div><div class="info"><b>Anita Patel — Meridian Bank</b><small>Intro call · inbound</small></div><div class="time">11:00</div></div>
+      </section>
+    </div>
+
+    <!-- ARTEFACTS -->
+    <section class="card arts">
+      <h2>This week's artefacts <span class="tag">LinkedIn · 3× / week</span></h2>
+      <div class="acards">
+        <div class="acard"><div class="d">MON 15</div><p>"Why the best US market entries start at the dinner table, not the boardroom…"</p><span class="st st-live">● Live · 1.2k views</span></div>
+        <div class="acard"><div class="d">WED 17</div><p>"3 things every CIO underestimates about scaling infra into the US…"</p><span class="st st-sched">◷ Scheduled · 9:00am</span></div>
+        <div class="acard"><div class="d">FRI 19</div><p>"The dinner invite that 23 tech leaders have already said yes to. [draft]"</p><span class="st st-draft">✎ Draft · needs review</span></div>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>
