@@ -4,6 +4,8 @@ generator client {
 }
 
 datasource db {
+  // Postgres for deploy (Vercel sets DATABASE_URL). For purely-local SQLite dev,
+  // temporarily set provider = "sqlite" / url = "file:./dev.db". (See SPEC.md §8.)
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
@@ -21,7 +23,6 @@ model Lead {
   emailSuppressed Boolean @default(false)
   notes         String?
 
-  // meeting (only once booked)
   meetingAt     DateTime?
   meetingEmail  String?
 
@@ -42,7 +43,20 @@ model Event {
 // Items the Reconciliation Queue couldn't place with certainty.
 model ReviewItem {
   id        Int      @id @default(autoincrement())
-  reason    String   // human-readable: "Booking might be Anita at Meridian"
-  payload   String   // raw JSON of the incoming event
+  reason    String
+  payload   String
   createdAt DateTime @default(now())
+}
+
+// LinkedIn content posts (Artefacts, SPEC.md §4).
+model Post {
+  id            Int      @id @default(autoincrement())
+  hook          String   // short calendar label
+  body          String   // the LinkedIn post text
+  scheduledDate DateTime // intended publish day
+  status        String   // "draft" | "scheduled" | "live"
+  note          String?  // internal SAWA note
+  approved      Boolean  @default(false) // Adam's optional approve
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
