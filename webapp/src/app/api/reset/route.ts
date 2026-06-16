@@ -8,9 +8,9 @@ export async function POST() {
   await prisma.lead.deleteMany();
   await prisma.post.deleteMany();
 
-  for (const [hook, body, date, status] of POSTS) {
+  for (const p of POSTS) {
     await prisma.post.create({
-      data: { hook, body, scheduledDate: new Date(date), status, approved: status === "live" },
+      data: { hook: p.hook, body: p.body, scheduledDate: new Date(p.date), status: p.status, note: p.note, approved: p.status === "live" },
     });
   }
 

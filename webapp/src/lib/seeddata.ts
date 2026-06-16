@@ -88,20 +88,88 @@ export function buildLeads(now: Date = new Date()): LeadData[] {
   return leads;
 }
 
-export const POSTS: [string, string, string, string][] = [
-  ["US entry myth", "Why the best US market entries start at the dinner table, not the boardroom.", "2026-06-08", "live"],
-  ["Infra at scale", "3 things every CIO underestimates about scaling infrastructure into the US.", "2026-06-10", "live"],
-  ["Trust & speed", "In US enterprise, trust is the bottleneck — not technology.", "2026-06-12", "live"],
-  ["Boardroom vs table", "The boardroom optimizes for consensus. The dinner table optimizes for candor.", "2026-06-15", "live"],
-  ["CIO underestimates", "The one question every CTO should ask before entering the US market.", "2026-06-17", "scheduled"],
-  ["20 leaders said yes", "The dinner invite that 20+ tech leaders have already said yes to.", "2026-06-19", "draft"],
-  ["The guest list", "Who's actually in the room matters more than what's on the agenda.", "2026-06-22", "draft"],
-  ["What to expect", "What a SAWA dinner actually looks like — no slides, no pitch.", "2026-06-24", "draft"],
-  ["Final seats", "We're down to the last handful of seats for the New York dinner.", "2026-06-26", "draft"],
-  ["Why New York", "Why New York is the only place to start a serious US enterprise push.", "2026-06-29", "draft"],
-  ["Meet Adam", "Meet Adam — the person behind the table.", "2026-07-01", "draft"],
-  ["Peer pressure (good)", "The fastest way to de-risk a US move: a room of peers who've done it.", "2026-07-03", "draft"],
-  ["Countdown", "Two weeks to the dinner. Here's what we're cooking up.", "2026-07-06", "draft"],
-  ["One week out", "7 days out. The guest list is closed.", "2026-07-08", "draft"],
-  ["See you there", "Final details for our New York CTO/CIO dinner.", "2026-07-10", "draft"],
+export type SeedPost = { date: string; status: string; hook: string; note: string; body: string };
+
+export const POSTS: SeedPost[] = [
+  {
+    date: "2026-06-22", status: "draft", hook: "The binary AI-ready question", note: "Educational · campaign opener",
+    body: `In 2026, the moment of product discovery increasingly happens inside AI search, conversational commerce, and LLM-powered assistants before a buyer ever reaches your site.
+
+There is now a binary question every ecommerce technology leader needs to answer: Can these AI experiences expose your products to this new buyer journey, or can't they?
+
+If the answer is "not yet," your ecommerce business is not ready for the discovery platforms that are reshaping how buyers find products.
+
+If you want to dive deeper on this topic, I'll be hosting a dinner with tech executives in ecommerce in NYC.
+
+Check the link to join a small, vetted group of fellow ecommerce technology decision makers for a candid conversation about what "AI-ready" really means and what you can do this quarter to close the gap.`,
+  },
+  {
+    date: "2026-06-24", status: "draft", hook: "Adobe study: AI traffic +693%", note: "Study · data-led hook",
+    body: `Traffic to retail sites from AI tools like ChatGPT, Gemini and Perplexity grew 693% from last year.
+
+Mind-blowing right?
+
+What is even more astonishing is that the shoppers arriving from AI tools convert 31% more than any other source and spend 45% more time on site.
+
+But not all ecommerce teams are capturing this value equally. The companies capturing this incremental traffic have invested in an AI forward tech stack and data infrastructure.
+
+The CTO's and CIO's who are staying on top of the latest technology developments are the ones winning in this new product discovery era.
+
+P.S If you want to dive deeper on this topic, I'll be hosting a dinner with tech executives in ecommerce in NYC.
+
+Check the link to join a small, vetted group of fellow ecommerce technology decision makers for a candid conversation about what "AI-ready" really means and what you can do this quarter to close the gap.`,
+  },
+  {
+    date: "2026-06-26", status: "draft", hook: "Dinner invite — direct CTA", note: "Direct CTA",
+    body: `In case you missed it, I'm hosting a dinner in NYC next month for ecommerce technology leaders.
+
+The premise is simple: Product discovery is moving into AI search and LLM assistants, and most teams have not mapped what it takes to stay visible there.
+
+So, I'm putting together a group of 10-15 CTO's and CIO's in the ecommerce space to have a candid conversation about the future of the buyer's journey and what it means to be "AI-ready".
+
+Drop your email in the link here and I'll send you more details:`,
+  },
+  {
+    date: "2026-06-29", status: "draft", hook: "AI-ready isn't a chatbot", note: "Educational · myth-bust",
+    body: `When most ecommerce tech teams hear "AI-ready," they start scoping a chatbot for their site.
+
+While it is a form of progress, I do think that it's solving the wrong problem.
+
+The AI that decides whether buyers find you lives in ChatGPT, Gemini, Perplexity and Google's AI overviews. It reads your product data from your feeds, your structured data, and your marketplace listings. From all of that it forms a view of what you sell, who it is for, and when to recommend it.
+
+A chatbot on your own site does nothing to change that view. By the time someone lands on your site, the assistant has already made its recommendation.
+
+So AI-readiness comes down to a question your team fully controls: when an assistant reads your catalog, can it understand your products well enough to recommend them for the right query?
+
+P.S This is exactly what I'll be discussing over dinner with a group of CTO's and CIO's next month in NYC. Check the link to join.`,
+  },
+  {
+    date: "2026-07-01", status: "draft", hook: "Study: bad product data breaks trust", note: "Study",
+    body: `73% of B2B ecommerce buyers say inaccurate product content damages their trust in a brand.
+
+For years that was a storefront or customer experience problem (a wrong image, a broken link, or an unintuitive website design).
+
+But in the age of AI, I see this mainly as a discoverability problem.
+
+When an AI assistant recommends products, it leans on your platform data to decide what fits a buyer's request. If your specs are wrong, missing or inconsistent, either the assistant skips your product, or it recommends the wrong one.
+
+Either way the buyer loses trust, and so does the assistant that recommended you. Next time, it routes around you.
+
+Auditing your product data is only one facet of what being "AI ready" means for ecommerce companies.
+
+If you want to dive deeper, I'll be hosting a dinner with tech executives in ecommerce in NYC. Check the link to join:`,
+  },
+  {
+    date: "2026-07-03", status: "draft", hook: "Dinner invite — the agenda", note: "Direct CTA",
+    body: `LinkedIn connections, I'm bringing together 10 to 15 CTOs and CIOs in the ecommerce space for a private executive dinner in NYC next month.
+
+A few topics we plan on discussing:
+
+• What does "AI-ready" mean for a catalog as complex as yours?
+• Where are buyers already discovering products through AI, and where is it still hype?
+• What can you realistically fix this quarter, and what belongs on a longer roadmap?
+• How are peers measuring whether AI even sees their products today?
+
+If you are a CTO/CIO of an ecommerce company with a complex catalog or you know someone who is, check the link below:`,
+  },
 ];
