@@ -126,6 +126,18 @@ export default function OutreachMessages() {
               </div>
             </div>
 
+            <div className="pp-foot">
+              <div className="walk">
+                <button className="arrow" disabled={idx <= 0} onClick={() => open(sorted[idx - 1])}>‹</button>
+                {idx + 1} of {sorted.length}
+                <button className="arrow" disabled={idx >= sorted.length - 1} onClick={() => open(sorted[idx + 1])}>›</button>
+              </div>
+              <div className="pp-actions">
+                <button className="pbtn" onClick={() => save()}>Save</button>
+                <LiquidGlass as="button" className="pbtn primary" tint="rgba(14,159,110,.88)" onClick={() => save({ approved: true, status: "scheduled" })}>✓ Approve</LiquidGlass>
+              </div>
+            </div>
+
             <div className="pp-body">
               {sel.channel === "email" && (
                 <>
@@ -138,18 +150,6 @@ export default function OutreachMessages() {
               </div>
               <textarea className="post-text" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} />
               {sel.note && <div className="pp-note">SAWA note: {sel.note}</div>}
-            </div>
-
-            <div className="pp-foot">
-              <div className="walk">
-                <button className="arrow" disabled={idx <= 0} onClick={() => open(sorted[idx - 1])}>‹</button>
-                {idx + 1} of {sorted.length}
-                <button className="arrow" disabled={idx >= sorted.length - 1} onClick={() => open(sorted[idx + 1])}>›</button>
-              </div>
-              <div className="pp-actions">
-                <button className="pbtn" onClick={() => save()}>Save</button>
-                <LiquidGlass as="button" className="pbtn primary" tint="rgba(14,159,110,.88)" onClick={() => save({ approved: true, status: "scheduled" })}>✓ Approve</LiquidGlass>
-              </div>
             </div>
           </div>
         </div>

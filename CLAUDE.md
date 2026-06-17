@@ -8,7 +8,7 @@ _Last updated: 2026-06-16_
 
 ## 1. Snapshot
 
-We are building a **one-off "command center" CRM** for a single, time-boxed marketing campaign: getting **CTOs and CIOs in New York** to book an introductory call with **Adam** ahead of an exclusive **dinner event on July 21, 2026**.
+We are building a **one-off "command center" CRM** for a single, time-boxed marketing campaign: getting **CTOs and CIOs in New York** to book an introductory call with **Adam** ahead of an exclusive **dinner event on July 22, 2026**.
 
 | Fact | Value |
 |---|---|
@@ -17,7 +17,7 @@ We are building a **one-off "command center" CRM** for a single, time-boxed mark
 | End beneficiary | The consulting firm's client — a company wanting to establish itself in the **US market** |
 | Campaign goal | Fill an **invite-only CTO/CIO dinner in New York** |
 | Conversion target | Lead → **booked call with Adam** (hard scope boundary) |
-| Event date | **July 21, 2026** (~5 weeks from project start) |
+| Event date | **July 22, 2026** (~5 weeks from project start) |
 | Outbound list size | **~200** named CTOs/CIOs |
 | Tool lifespan | One campaign, ~5–6 weeks. Not a reusable platform. |
 
@@ -173,11 +173,11 @@ is on SAWA's side, not Adam's.
 - The combined cross-channel **"who's booked"** number is **accurate** (no double-counts, no orphan bookings).
 - Adam can answer "how is the campaign going?" in **under 30 seconds** from the home view.
 - SAWA operators always know **who needs action and who's the blocker**.
-- The tool is **live and trustworthy well before July 21, 2026**.
+- The tool is **live and trustworthy well before July 22, 2026**.
 
 ---
 
 ## 11. Working notes
 
-- Visual exploration mockups live in **`/mockups/`** (`index.html` links all three: A-Briefing, B-Pipeline, C-Workspace). _Note: mockups still show placeholder dates — to be refreshed to the July 21 timeline._
+- Visual exploration mockups live in **`/mockups/`** (`index.html` links all three: A-Briefing, B-Pipeline, C-Workspace). _Note: mockups still show placeholder dates — to be refreshed to the July 22 timeline._
 - Process being followed: brainstorm → context (this doc) → detailed usability/design → implementation spec → plan → build.

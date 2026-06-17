@@ -10,20 +10,28 @@ const LED: Record<string, string> = {
   signed_up: "#94a3b8", emailed: "#c97a12",
 };
 
+const daysToEvent = () =>
+  Math.max(0, Math.ceil((new Date("2026-07-22").getTime() - Date.now()) / 86400000));
+
 export default function Pipeline() {
   const { leads, refresh } = useLeads();
   const [channel, setChannel] = useState<"outbound" | "inbound">("outbound");
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const selected = leads.find((l) => l.id === selectedId) ?? null;
 
   const stages = channel === "inbound" ? INBOUND_STAGES : OUTBOUND_STAGES;
   const inChannel = (l: Lead) => l.channel === channel || l.channel === "both";
   const visible = leads.filter(inChannel);
+  const toggle = (s: string) => setCollapsed((c) => ({ ...c, [s]: !c[s] }));
 
   return (
     <>
-      <div className="top"><div className="t-stagger"><h1 className="t-stagger-line t-stagger-line--1">Lead Pipeline</h1>
-        <div className="sub t-stagger-line t-stagger-line--2">Cards move on their own as Dripify &amp; Calendly fire.</div></div></div>
+      <div className="top">
+        <div className="t-stagger"><h1 className="t-stagger-line t-stagger-line--1">Lead Pipeline</h1>
+          <div className="sub t-stagger-line t-stagger-line--2">Cards move on their own as Dripify &amp; Calendly fire.</div></div>
+        <LiquidGlass className="countdown" tint="rgba(255,255,255,.5)"><b>{daysToEvent()}</b><span>days to dinner · Jul 22</span></LiquidGlass>
+      </div>
 
       <div className="controls">
         <div className="seg">
@@ -39,24 +47,26 @@ export default function Pipeline() {
       <div className={`board ${channel}`}>
         {stages.map((stage) => {
           const cards = visible.filter((l) => l.stage === stage);
+          const isCollapsed = !!collapsed[stage];
           return (
-            <div className={`col ${stage === "replied" ? "replied" : ""} ${stage === "booked" ? "booked" : ""}`} key={stage}>
-              <div className="col-h">
-                <div className="t"><span className="led" style={{ background: LED[stage] }} /> {STAGE_LABELS[stage]}</div>
+            <div className={`col ${stage === "replied" ? "replied" : ""} ${stage === "booked" ? "booked" : ""} ${isCollapsed ? "collapsed" : ""}`} key={stage}>
+              <button className="col-h" onClick={() => toggle(stage)} aria-expanded={!isCollapsed}>
+                <div className="t"><span className={`col-chev ${isCollapsed ? "down" : ""}`}>▾</span><span className="led" style={{ background: LED[stage] }} /> {STAGE_LABELS[stage]}</div>
                 <span className="ct">{cards.length}</span>
-              </div>
-              <div className="cards">
-                {cards.map((l) => (
-                  <div className="lc" key={l.id} onClick={() => setSelectedId(l.id)}>
-                    <div className="nm">{l.name}</div>
-                    <div className="ro">{l.title} · {l.company}</div>
-                    {stage === "replied" && <span className="star">Waiting on Adam</span>}
-                    {stage === "booked" && l.meetingAt && (
-                      <span className="mt">{new Date(l.meetingAt).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              </button>
+              {!isCollapsed && (
+                <div className="cards">
+                  {cards.map((l) => (
+                    <div className="lc" key={l.id} onClick={() => setSelectedId(l.id)}>
+                      <div className="nm">{l.name}</div>
+                      <div className="ro">{l.title} · {l.company}</div>
+                      {stage === "booked" && l.meetingAt && (
+                        <span className="mt">{new Date(l.meetingAt).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

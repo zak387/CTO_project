@@ -10,10 +10,11 @@ export const OUTBOUND_STAGES = [
   "booked",
 ] as const;
 
+// Inbound tracks only Signed Up (landing form) → Booked (Calendly). Emailed and
+// Replied were dropped — the warm email is a bulk nudge and inbound replies
+// aren't webhook-tracked, so neither had a reliable per-lead source.
 export const INBOUND_STAGES = [
   "signed_up",
-  "emailed",
-  "replied",
   "booked",
 ] as const;
 
@@ -41,6 +42,6 @@ export const EVENT_TO_STAGE: Record<string, string> = {
   message_sent: "connection_sent",
   replied: "replied",
   signed_up: "signed_up",
-  emailed: "emailed",
+  emailed: "signed_up",
   booked: "booked",
 };

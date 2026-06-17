@@ -92,7 +92,7 @@ export default function PostsCalendar() {
         <span><span className="abadge ast-live">LIVE</span> posted</span>
         <span><span className="abadge ast-scheduled">SCHEDULED</span> approved &amp; queued</span>
         <span><span className="abadge ast-draft">DRAFT</span> needs Adam&apos;s review</span>
-        <span className="legamber">amber outline = waiting on you</span>
+        <span className="legamber">amber outline = needs your review</span>
       </div>
 
       {/* side panel */}
@@ -110,12 +110,6 @@ export default function PostsCalendar() {
               </div>
             </div>
 
-            <div className="pp-body">
-              <div className="field-lbl">Post body — edit, then Save{sel.approved && <span className="reviewed-flag">✓ Approved</span>}</div>
-              <textarea className="post-text" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} />
-              {sel.note && <div className="pp-note">SAWA note: {sel.note}</div>}
-            </div>
-
             <div className="pp-foot">
               <div className="walk">
                 <button className="arrow" disabled={idx <= 0} onClick={() => open(sorted[idx - 1])}>‹</button>
@@ -126,6 +120,12 @@ export default function PostsCalendar() {
                 <button className="pbtn" onClick={() => save()}>Save</button>
                 <LiquidGlass as="button" className="pbtn primary" tint="rgba(14,159,110,.88)" onClick={() => save({ approved: true, status: "scheduled" })}>✓ Approve</LiquidGlass>
               </div>
+            </div>
+
+            <div className="pp-body">
+              <div className="field-lbl">Post body — edit, then Save{sel.approved && <span className="reviewed-flag">✓ Approved</span>}</div>
+              <textarea className="post-text" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} />
+              {sel.note && <div className="pp-note">SAWA note: {sel.note}</div>}
             </div>
           </div>
         </div>

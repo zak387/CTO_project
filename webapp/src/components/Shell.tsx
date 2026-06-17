@@ -23,7 +23,6 @@ type Leaf = { href: string; label: string; ic: string };
 type Group = { label: string; ic: string; base: string; children: { href: string; label: string }[] };
 
 const NAV: (Leaf | Group)[] = [
-  { href: "/", label: "Overview", ic: "overview" },
   { href: "/pipeline", label: "Lead Pipeline", ic: "pipeline" },
   { href: "/meetings", label: "Meetings Booked", ic: "meetings" },
   {

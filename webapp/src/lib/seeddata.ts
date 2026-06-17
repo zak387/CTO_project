@@ -17,7 +17,7 @@ const COMPANY = ["Northwind Logistics", "Tessellate AI", "Kanso Robotics", "Sols
   "Tidal Cosmetics", "Umbra Lighting", "Verdant Home", "Willow Pets", "Xenon Gaming"];
 
 const OUT_CHAIN = ["connection_sent", "replied", "booked"];
-const IN_CHAIN = ["signed_up", "emailed", "replied", "booked"];
+const IN_CHAIN = ["signed_up", "booked"];
 const LAST_AGO = [10, 35, 90, 150, 320, 60, 480, 1440, 200, 25, 720, 2880]; // minutes ago for current stage
 const MEET_OFFSETS = [-7, -5, -3, -1, 1, 2, 3, 5, 7, 10, 14, 18, -2, 4]; // days from now
 
@@ -76,10 +76,9 @@ export function buildLeads(now: Date = new Date()): LeadData[] {
   add("outbound", "connection_sent", 54);
   add("outbound", "replied", 9);
   add("outbound", "booked", 7);
-  // Inbound funnel
-  add("inbound", "signed_up", 9);
-  add("inbound", "emailed", 7);
-  add("inbound", "replied", 5);
+  // Inbound funnel — Emailed/Replied folded into Signed Up now those stages are
+  // dropped (9 + 7 + 5 = 21).
+  add("inbound", "signed_up", 21);
   add("inbound", "booked", 5);
 
   return leads;
@@ -193,7 +192,7 @@ Given your profile, I would love to have you at the dinner. Is this something yo
   {
     channel: "linkedin", label: "Message 2 — follow-up", step: 2, meta: "follow-up · with Calendly",
     status: "needs_review", note: "Swap [Calendly link] for Adam's real Calendly URL before this goes out.",
-    body: `I'm hosting the dinner in Cathédrale NYC on July 21st. I have 10 tech executives in ecommerce committed so far.
+    body: `I'm hosting the dinner in Cathédrale NYC on July 22nd. I have 10 tech executives in ecommerce committed so far.
 
 I would still love to have you at the dinner. Here's my Calendly if you want to chat through more of the details: [Calendly link]`,
   },
