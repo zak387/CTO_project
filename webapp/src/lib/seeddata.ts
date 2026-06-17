@@ -173,3 +173,49 @@ A few topics we plan on discussing:
 If you are a CTO/CIO of an ecommerce company with a complex catalog or you know someone who is, check the link below:`,
   },
 ];
+
+// Outbound outreach messages (Artefacts → Outreach messages). The LinkedIn
+// sequence runs through Dripify; the email follow-ups are bulk nudges.
+export type SeedMessage = {
+  channel: string; label: string; step: number; meta: string;
+  subject?: string; status: string; note?: string; body: string;
+};
+
+export const MESSAGES: SeedMessage[] = [
+  {
+    channel: "linkedin", label: "Connection request note", step: 1, meta: "sent with the invite",
+    status: "live", note: "Keep under 300 chars (LinkedIn limit).",
+    body: `Hi {{first}}, I lead growth partnerships for NYC tech and I'm pulling together a small group of CTOs/CIOs around US-market strategy. Your work at {{company}} fits the room — would love to connect.`,
+  },
+  {
+    channel: "linkedin", label: "Follow-up #1", step: 2, meta: "day 2 after connect",
+    status: "needs_review", note: "First touch after they accept — the soft pitch.",
+    body: `Thanks for connecting, {{first}}. Quick reason I reached out: on July 21 we're hosting an invite-only dinner in NYC for a handful of CTOs/CIOs on breaking into and scaling in the US market. Adam (who's hosting) would love to walk you through it on a short call — open to it?`,
+  },
+  {
+    channel: "linkedin", label: "Follow-up #2", step: 3, meta: "day 7 nudge",
+    status: "needs_review", note: "Final nudge before they go quiet.",
+    body: `No worries if the timing's off, {{first}} — seats for the July 21 dinner are limited so I wanted to check before they fill. Happy to send a couple of times for a 15-min call with Adam if it's useful.`,
+  },
+  {
+    channel: "email", label: "Outbound nudge — unresponsive leads", step: 1, meta: "bulk · day 10",
+    subject: "One seat left with your name on it?", status: "scheduled",
+    note: "Suppressed automatically once a lead replies on LinkedIn.",
+    body: `Hi {{first}},
+
+Circling back on the July 21 NYC dinner for ecommerce tech leaders. If you'd like the details, here's Adam's calendar for a quick intro call: {{calendly}}.
+
+If it's not for you, no problem at all — just reply and I'll close the loop.`,
+  },
+  {
+    channel: "email", label: "Inbound welcome — landing-page signups", step: 2, meta: "sent on signup",
+    subject: "Thanks for signing up — let's get you the details", status: "needs_review",
+    note: "The warm convert email for inbound signups.",
+    body: `Hi {{first}},
+
+Thanks for your interest in the July 21 dinner. The best next step is a short call with Adam to walk you through it and see if it's a fit — grab a time here: {{calendly}}.
+
+Looking forward to it,
+The SAWA team`,
+  },
+];

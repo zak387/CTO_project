@@ -49,7 +49,7 @@ model ReviewItem {
   createdAt DateTime @default(now())
 }
 
-// LinkedIn content posts (Artefacts, SPEC.md §4).
+// LinkedIn content posts (Artefacts → Posts calendar, SPEC.md §4).
 model Post {
   id            Int      @id @default(autoincrement())
   hook          String   // short calendar label
@@ -60,4 +60,22 @@ model Post {
   approved      Boolean  @default(false) // Adam's optional approve
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// Outbound outreach copy (Artefacts → Outreach messages). The LinkedIn/email
+// messages that go out to leads; Adam reviews, edits, and approves them — the
+// same edit/save/approve mechanism as Post.
+model OutreachMessage {
+  id        Int      @id @default(autoincrement())
+  channel   String   // "linkedin" | "email"
+  label     String   // e.g. "Connection request note", "Follow-up #1"
+  step      Int      // ordering within its channel's sequence
+  meta      String?  // when it sends, e.g. "day 2 after connect"
+  subject   String?  // email subject line (email channel only)
+  body      String   // the message copy
+  status    String   // "needs_review" | "scheduled" | "live"
+  note      String?  // internal SAWA note
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
