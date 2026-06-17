@@ -1,7 +1,15 @@
 # Real Leads CSV Import — Design
 
 _Date: 2026-06-17_
-_Status: approved, ready for implementation plan_
+_Status: IMPLEMENTED (`webapp/scripts/import-leads.ts`)._
+
+> **Deviation from this design (confirmed with user):** the `"new"` stage in §2 was
+> dropped. After this spec was written we moved to a reply-only Dripify webhook
+> (one condition per campaign), so there is no connection-sent webhook to move a
+> lead out of "New" — it would sit there until they replied. Imported leads
+> therefore land directly at **`stage = "connection_sent"`** (the board's pre-reply
+> bucket: Connection Sent → Replied → Booked). No `"new"` stage/column was added.
+> The script also adds a `--dry-run` preview flag. Everything else matches.
 
 ## Goal
 

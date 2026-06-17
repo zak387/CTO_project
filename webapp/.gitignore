@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# real leads CSV (PII) — never commit; import script reads from here
+/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
