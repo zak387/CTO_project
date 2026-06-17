@@ -1,4 +1,4 @@
-// Shared dummy data for the seed script and the /api/reset endpoint.
+// Shared seed data for the prisma seed script and the content-reseed endpoint.
 
 const FIRST = ["Derek", "Marcus", "Hiro", "Priya", "Lena", "Owen", "Yusuf", "Grace", "Ben", "Anita",
   "Sofia", "Carla", "Nadia", "Eli", "Devon", "Rajesh", "Thomas", "Elena", "Maya", "Victor",

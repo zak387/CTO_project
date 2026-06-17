@@ -4,9 +4,23 @@ import { POSTS, MESSAGES } from "@/lib/seeddata";
 
 // Non-destructive content reseed: refreshes ONLY the Artefacts content tables
 // (Post + OutreachMessage) from the seed file. It deliberately does NOT touch
-// Lead / Event / ReviewItem, so a real imported lead list is preserved.
-// NOTE: open + unauthenticated — remove or lock down before launch.
-export async function POST() {
+// Lead / Event / ReviewItem, so the real imported lead list is preserved.
+//
+// Safe by default: DISABLED unless a RESEED_TOKEN env var is set, and then it
+// requires a matching ?token= on the request. So there is no open, unguarded
+// mutation endpoint in production.
+export async function POST(req: Request) {
+  const token = process.env.RESEED_TOKEN;
+  if (!token) {
+    return NextResponse.json(
+      { error: "Reseed is disabled. Set RESEED_TOKEN in the environment to enable it." },
+      { status: 403 }
+    );
+  }
+  if (new URL(req.url).searchParams.get("token") !== token) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   await prisma.post.deleteMany();
   await prisma.outreachMessage.deleteMany();
 
