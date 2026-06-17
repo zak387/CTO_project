@@ -6,8 +6,8 @@ import LeadDrawer from "@/components/LeadDrawer";
 import { LiquidGlass } from "@/components/LiquidGlass";
 
 const LED: Record<string, string> = {
-  connection_sent: "#94a3b8", connected: "#3b6bd6", message_sent: "#c97a12",
-  replied: "#d23f6b", booked: "#0f9d6e", signed_up: "#94a3b8", emailed: "#c97a12",
+  connection_sent: "#94a3b8", replied: "#d23f6b", booked: "#0f9d6e",
+  signed_up: "#94a3b8", emailed: "#c97a12",
 };
 
 export default function Pipeline() {
@@ -50,10 +50,6 @@ export default function Pipeline() {
                   <div className="lc" key={l.id} onClick={() => setSelectedId(l.id)}>
                     <div className="nm">{l.name}</div>
                     <div className="ro">{l.title} · {l.company}</div>
-                    {stage === "message_sent" && (() => {
-                      const n = l.events.filter((e) => e.type === "message_sent").length;
-                      return <span className="follow">{n} follow-up{n === 1 ? "" : "s"} sent</span>;
-                    })()}
                     {stage === "replied" && <span className="star">Waiting on Adam</span>}
                     {stage === "booked" && l.meetingAt && (
                       <span className="mt">{new Date(l.meetingAt).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>

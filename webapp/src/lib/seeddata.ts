@@ -16,7 +16,7 @@ const COMPANY = ["Northwind Logistics", "Tessellate AI", "Kanso Robotics", "Sols
   "Nimbus Tech", "Orchard Grocer", "Pinecone Labs", "Quartz Living", "Ridgeline Sports", "Summit Outdoors",
   "Tidal Cosmetics", "Umbra Lighting", "Verdant Home", "Willow Pets", "Xenon Gaming"];
 
-const OUT_CHAIN = ["connection_sent", "connected", "message_sent", "replied", "booked"];
+const OUT_CHAIN = ["connection_sent", "replied", "booked"];
 const IN_CHAIN = ["signed_up", "emailed", "replied", "booked"];
 const LAST_AGO = [10, 35, 90, 150, 320, 60, 480, 1440, 200, 25, 720, 2880]; // minutes ago for current stage
 const MEET_OFFSETS = [-7, -5, -3, -1, 1, 2, 3, 5, 7, 10, 14, 18, -2, 4]; // days from now
@@ -44,8 +44,6 @@ export function buildLeads(now: Date = new Date()): LeadData[] {
       const title = idx % 3 === 0 ? "CIO" : "CTO";
 
       const types = chain.slice(0, chain.indexOf(stage) + 1);
-      // some message_sent leads got several follow-ups
-      if (stage === "message_sent") for (let f = 0; f < idx % 3; f++) types.push("message_sent");
 
       const lastAgoMin = LAST_AGO[idx % LAST_AGO.length];
       const events = types.map((t, ti) => ({
@@ -73,10 +71,9 @@ export function buildLeads(now: Date = new Date()): LeadData[] {
     }
   };
 
-  // Outbound funnel
-  add("outbound", "connection_sent", 24);
-  add("outbound", "connected", 16);
-  add("outbound", "message_sent", 14);
+  // Outbound funnel — Connected/Message Sent folded into the Connection Sent
+  // bucket now that those stages are dropped (24 + 16 + 14 = 54).
+  add("outbound", "connection_sent", 54);
   add("outbound", "replied", 9);
   add("outbound", "booked", 7);
   // Inbound funnel
