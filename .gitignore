@@ -41,3 +41,6 @@ transitions.dev/
 .superpowers/
 .claude/
 .gstack/
+
+# Playwright MCP scratch snapshots
+.playwright-mcp/
