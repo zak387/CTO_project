@@ -200,25 +200,4 @@ Given your profile, I would love to have you at the dinner. Is this something yo
 
 I would still love to have you at the dinner. Here's my Calendly if you want to chat through more of the details: [Calendly link]`,
   },
-  {
-    channel: "email", label: "Outbound nudge — unresponsive leads", step: 1, meta: "bulk · day 10",
-    subject: "One seat left with your name on it?", status: "scheduled",
-    note: "Suppressed automatically once a lead replies on LinkedIn.",
-    body: `Hi {{first}},
-
-Circling back on the July 21 NYC dinner for ecommerce tech leaders. If you'd like the details, here's Adam's calendar for a quick intro call: {{calendly}}.
-
-If it's not for you, no problem at all — just reply and I'll close the loop.`,
-  },
-  {
-    channel: "email", label: "Inbound welcome — landing-page signups", step: 2, meta: "sent on signup",
-    subject: "Thanks for signing up — let's get you the details", status: "needs_review",
-    note: "The warm convert email for inbound signups.",
-    body: `Hi {{first}},
-
-Thanks for your interest in the July 21 dinner. The best next step is a short call with Adam to walk you through it and see if it's a fit — grab a time here: {{calendly}}.
-
-Looking forward to it,
-The SAWA team`,
-  },
 ];
