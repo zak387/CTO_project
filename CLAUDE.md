@@ -65,7 +65,7 @@ Driven by Adam's LinkedIn content (3 posts/week). A stranger sees a post and **s
 | **Calendly** | Call booking (Adam's calendar) | Clean native webhooks. |
 | **Landing page** | Inbound signup capture | Form posts data into the CRM. |
 
-> Access note: the campaigns run through **Adam's accounts**; SAWA is using **free trials** to build and test. Dripify webhooks require a **paid (Pro) plan** — confirm before relying on them.
+> Access note: the campaigns run through **Adam's accounts**. Dripify webhooks require a **paid (Pro) plan** — ✅ Adam's account is now on **Pro**, so webhooks are live and available to wire up (verified June 2026).
 
 ---
 
@@ -105,14 +105,17 @@ These were decided after building 3 mockups (`/mockups/`) and running an adversa
 
 ## 7. Hard technical constraint — Dripify (verified)
 
-Dripify has **no public REST API** and **no native Zapier/Make app**. The only way to extract data is Dripify's **outbound webhooks** (Pro plan+):
+Dripify has **no public REST API**. It *does* have native **Zapier** and **Make** integrations plus native CRM connectors (HubSpot, Salesforce, Pipedrive, …) — but the simplest path is its **outbound webhooks** (Pro plan+, which Adam's account now has), which we point **directly** at our own endpoint (no Zapier middleman needed). Verified June 2026 against Dripify's help center:
 
-- Fires per-campaign on: **invite/connection sent**, **message sent**, **reply received**.
-- Carries **~22 lead fields**, **keyed by LinkedIn URL**.
+- A webhook fires on a chosen trigger: **invite/connection sent**, **connection accepted**, **message sent**, or **reply received**.
+- Carries ~16 named lead fields (name, **LinkedIn URL**, company, email, title, …), **keyed by LinkedIn URL**. Missing fields are simply omitted. The body carries **NO event-type field** — which transition fired is only knowable from *which URL* you gave Dripify.
 - Carries **NO message content** — we know *that* a lead replied, not *what* they said.
-- **Only one trigger condition per webhook per campaign** → model each state transition as its own receiver endpoint (e.g. `/dripify/sent`, `/dripify/accepted`, `/dripify/reply`) and dedupe by LinkedIn URL.
+- **Hard limit (verified): exactly one webhook with one trigger condition per campaign.** The webhook is a single field on the campaign — you cannot attach a second webhook for a different event. Capturing all four transitions would require four separate campaigns, which isn't how a Dripify drip sequence works.
+- **Reply fires once** — on the lead's *first* response in the campaign (not every reply). Perfect: that first reply is exactly our handoff point.
 
-**Implication:** the CRM must be a real hosted web app with its own **webhook-receiver endpoints** + database — not a spreadsheet or no-code board.
+**Decision (June 2026):** because of the one-condition limit we wire **one** webhook per outbound campaign on **"reply received"** — the single highest-value signal (it powers the "⚑ Waiting on you" hook, §6). The earlier kanban stages do **not** auto-populate from Dripify; leads are **seeded at `Connection Sent` on import** and jump to **Replied** when the webhook fires. Live receiver: `POST /api/webhooks/dripify` (reads an optional `?event=` so the same endpoint stays reusable; a bare URL defaults to `replied`). Logs every raw payload so the first real fire reveals Dripify's exact field keys.
+
+**Implication:** the CRM must be a real hosted web app with its own **webhook-receiver endpoint** + database — not a spreadsheet or no-code board.
 
 ---
 
@@ -133,16 +136,21 @@ These are unresolved and block a trustworthy data model. Resolve early:
 Outbound:  Connection Sent → Connected → Replied → Adam Handling → Call Booked
 Inbound:   Signed Up → (warm email) → Adam Handling → Call Booked
 
-Outbound kanban stages (left → right):
-  Connection Sent → Connected → Message Sent → Replied → Booked
-Inbound kanban stages:
-  Signed Up → Emailed → Replied → Booked
+Kanban stages — REVISED June 2026. Dripify gives us only the "reply" event
+(one webhook condition per campaign, §7), so the middle stages can't be
+auto-tracked. We deliberately track only TWO transitions: Replied and Booked.
+  Outbound:  Connection Sent (seeded at import) → Replied → Booked
+  Inbound:   Signed Up (landing form)           → Replied → Booked
+The dropped columns (Connected, Message Sent, Emailed) had no reliable data
+source and are not shown.
 
-We track ONLY up to the initial reply — not the ongoing conversation:
-  …→ Message Sent → REPLIED (tracked)
-                  → [Adam carries the conversation, UNTRACKED] → BOOKED (tracked)
+We track ONLY the initial reply — not the ongoing conversation:
+  Connection Sent → REPLIED (tracked, via Dripify)
+                  → [Adam carries the conversation, UNTRACKED] → BOOKED (tracked, via Calendly)
 
 Confirmed states:
+  • Connection Sent — the starting bucket; every imported outbound lead begins
+                here (we did send all ~200 connection requests). Not a Dripify event.
   • Replied   ✅ tracked — they responded to the initial outreach. This is the
                 handoff point. Such leads appear in the "⚑ Waiting on you" list.
   • Booked    ✅ tracked — via Calendly. Leaves the Waiting list automatically.
