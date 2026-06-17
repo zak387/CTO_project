@@ -183,19 +183,22 @@ export type SeedMessage = {
 
 export const MESSAGES: SeedMessage[] = [
   {
-    channel: "linkedin", label: "Connection request note", step: 1, meta: "sent with the invite",
-    status: "live", note: "Keep under 300 chars (LinkedIn limit).",
-    body: `Hi {{first}}, I lead growth partnerships for NYC tech and I'm pulling together a small group of CTOs/CIOs around US-market strategy. Your work at {{company}} fits the room — would love to connect.`,
+    channel: "linkedin", label: "Message 1 — intro", step: 1, meta: "first message after they connect",
+    status: "needs_review", note: "Adam's opener once a CTO/CIO accepts the connection.",
+    body: `Hey %%first_name%%, great to connect!
+
+I wanted to reach out because I'm hosting a tech leader dinner in NYC in late July with a dozen ecommerce executives (mainly CTO's and CIO's).
+
+Given your profile, I would love to have you at the dinner. Is this something you would be interested in joining?
+
+-Adam`,
   },
   {
-    channel: "linkedin", label: "Follow-up #1", step: 2, meta: "day 2 after connect",
-    status: "needs_review", note: "First touch after they accept — the soft pitch.",
-    body: `Thanks for connecting, {{first}}. Quick reason I reached out: on July 21 we're hosting an invite-only dinner in NYC for a handful of CTOs/CIOs on breaking into and scaling in the US market. Adam (who's hosting) would love to walk you through it on a short call — open to it?`,
-  },
-  {
-    channel: "linkedin", label: "Follow-up #2", step: 3, meta: "day 7 nudge",
-    status: "needs_review", note: "Final nudge before they go quiet.",
-    body: `No worries if the timing's off, {{first}} — seats for the July 21 dinner are limited so I wanted to check before they fill. Happy to send a couple of times for a 15-min call with Adam if it's useful.`,
+    channel: "linkedin", label: "Message 2 — follow-up", step: 2, meta: "follow-up · with Calendly",
+    status: "needs_review", note: "Swap [Calendly link] for Adam's real Calendly URL before this goes out.",
+    body: `I'm hosting the dinner in Cathédrale NYC on July 21st. I have 10 tech executives in ecommerce committed so far.
+
+I would still love to have you at the dinner. Here's my Calendly if you want to chat through more of the details: [Calendly link]`,
   },
   {
     channel: "email", label: "Outbound nudge — unresponsive leads", step: 1, meta: "bulk · day 10",
