@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLeads, type Lead } from "@/lib/useLeads";
 import { OUTBOUND_STAGES, INBOUND_STAGES, STAGE_LABELS } from "@/lib/stages";
 import LeadDrawer from "@/components/LeadDrawer";
@@ -19,6 +19,15 @@ export default function Pipeline() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const selected = leads.find((l) => l.id === selectedId) ?? null;
+
+  // On mobile, start every column collapsed so you land on a compact stack of
+  // tappable bars instead of scrolling through hundreds of cards.
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 980px)").matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- matchMedia is client-only; collapse once after mount
+      setCollapsed({ connection_sent: true, replied: true, booked: true, signed_up: true });
+    }
+  }, []);
 
   const stages = channel === "inbound" ? INBOUND_STAGES : OUTBOUND_STAGES;
   const inChannel = (l: Lead) => l.channel === channel || l.channel === "both";
@@ -51,8 +60,9 @@ export default function Pipeline() {
           return (
             <div className={`col ${stage === "replied" ? "replied" : ""} ${stage === "booked" ? "booked" : ""} ${isCollapsed ? "collapsed" : ""}`} key={stage}>
               <button className="col-h" onClick={() => toggle(stage)} aria-expanded={!isCollapsed}>
-                <div className="t"><span className={`col-chev ${isCollapsed ? "down" : ""}`}>▾</span><span className="led" style={{ background: LED[stage] }} /> {STAGE_LABELS[stage]}</div>
+                <div className="t"><span className="led" style={{ background: LED[stage] }} /> {STAGE_LABELS[stage]}</div>
                 <span className="ct">{cards.length}</span>
+                <span className={`col-chev ${isCollapsed ? "down" : ""}`} aria-hidden>▾</span>
               </button>
               {!isCollapsed && (
                 <div className="cards">

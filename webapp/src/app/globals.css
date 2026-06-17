@@ -96,11 +96,11 @@ h1{font-size:28px;letter-spacing:-.01em;font-weight:600;color:var(--ink)}
 .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
 .board.inbound{grid-template-columns:repeat(2,1fr);max-width:680px}
 .col{background:transparent;border-radius:0;min-height:120px}
-.col-h{display:flex;align-items:baseline;justify-content:space-between;padding:0 2px 10px;border:none;border-bottom:1px solid var(--line);margin-bottom:11px;width:100%;background:none;font:inherit;color:inherit;cursor:pointer;text-align:left}
-.col-chev{font-size:9px;color:var(--faint);transition:transform .15s ease;display:inline-block}
+.col-h{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:0 2px 10px;border:none;border-bottom:1px solid var(--line);margin-bottom:11px;width:100%;background:none;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.col-chev{font-size:11px;color:var(--muted);transition:transform .15s ease;display:inline-block}
 .col-chev.down{transform:rotate(-90deg)}
 .col.collapsed .col-h{margin-bottom:0}
-.col-h .t{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.col-h .t{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;flex:1}
 .col-h .led{width:7px;height:7px;border-radius:50%}
 .col-h .ct{font-size:15px;color:var(--ink);background:transparent;border-radius:0;padding:0;font-weight:600}
 .cards{padding:0;display:flex;flex-direction:column;gap:9px}
@@ -386,6 +386,10 @@ details[open] .psum::before{content:"▾ "}
   .main{padding:18px 14px 50px}
   .grid,.simgrid{grid-template-columns:1fr}
   .board,.board.inbound{grid-template-columns:1fr;gap:10px}.col{min-height:0}
+  /* each column header becomes an obvious, full-width tappable accordion bar */
+  .col-h{padding:13px 14px;margin-bottom:0;border:1px solid var(--line);border-radius:9px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .col:not(.collapsed) .col-h{margin-bottom:10px}
+  .col-chev{font-size:13px;color:var(--ink)}
 }
 
 @media(max-width:600px){
