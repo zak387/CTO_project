@@ -13,6 +13,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { normLinkedin } from "../src/lib/linkedin";
 
 // ---- load .env (only fills vars not already in the environment) ----
 const envPath = path.resolve(process.cwd(), ".env");
@@ -100,16 +101,8 @@ if (col.company === -1) die(`Could not find a "Company Name" column. Header was:
 
 const cell = (row: string[], i: number) => (i >= 0 && i < row.length ? row[i].trim() : "");
 
-// ---- normalize a LinkedIn URL into a stable key for Dripify matching ----
-function normLinkedin(v: string): string | null {
-  let s = v.trim().replace(/^["'<]+|["'>]+$/g, "");
-  if (!s) return null;
-  if (!/^https?:\/\//i.test(s)) s = "https://" + s;
-  s = s.toLowerCase().split("?")[0].split("#")[0]; // drop query + hash
-  s = s.replace(/^https?:\/\/www\./, "https://");   // drop www.
-  s = s.replace(/\/+$/, "");                          // drop trailing slash(es)
-  return s || null;
-}
+// LinkedIn URL normalization is shared with the webhook receiver (see top import)
+// so a stored key and an incoming key are guaranteed to match.
 
 // ---- build the import set ----
 type Row = { name: string; title: string; company: string; linkedinUrl: string | null; email: string | null };

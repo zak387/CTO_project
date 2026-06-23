@@ -1,9 +1,12 @@
-// The Reconciliation Queue (see SPEC.md §6)
-// Every incoming event runs the matching ladder, then updates the right Lead
-// silently — or drops to the Review Tray when uncertain.
+// The matching ladder (see SPEC.md §6)
+// Every incoming event runs the ladder and silently updates the right Lead.
+// Ladder: LinkedIn URL → email → unique name (company ignored; people change
+// jobs) → name+company only to break a tie. Nothing reaches Adam: in the rare
+// case it genuinely can't decide, it leaves a quiet backstop note for SAWA.
 
 import { prisma } from "./prisma";
 import { EVENT_TO_STAGE } from "./stages";
+import { normLinkedin } from "./linkedin";
 
 type Ladder = {
   leadId?: number;
@@ -13,6 +16,34 @@ type Ladder = {
   company?: string;
 };
 
+// --- loose-match helpers (case/punctuation tolerant) ----------------------
+const normName = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+// Drop the corporate suffix noise so "Eagle's Honor, LLC" == "Eagles Honor".
+const normCompany = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\b(llc|inc|ltd|corp|co|company|gmbh|plc|sa)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// True when two names plausibly belong to the same person, allowing for
+// LinkedIn truncating the surname to an initial ("Raymond Hofmeister" ⇄
+// "Raymond H.").
+function nameLooksSame(a: string, b: string): boolean {
+  const A = normName(a).split(" ").filter(Boolean);
+  const B = normName(b).split(" ").filter(Boolean);
+  if (!A.length || !B.length) return false;
+  if (A[0] !== B[0]) return false; // first names must agree
+  const al = A[A.length - 1];
+  const bl = B[B.length - 1];
+  if (al === bl) return true;
+  if (al.length === 1 && bl.startsWith(al)) return true; // "h" ⇄ "hofmeister"
+  if (bl.length === 1 && al.startsWith(bl)) return true;
+  return false;
+}
+
 // Returns { lead, matchType } or null.
 async function matchLead(k: Ladder) {
   // 1. hidden lead id (Calendly)
@@ -20,11 +51,11 @@ async function matchLead(k: Ladder) {
     const lead = await prisma.lead.findUnique({ where: { id: k.leadId } });
     if (lead) return { lead, matchType: "id" as const };
   }
-  // 2. LinkedIn URL (Dripify)
-  if (k.linkedinUrl) {
-    const lead = await prisma.lead.findUnique({
-      where: { linkedinUrl: k.linkedinUrl },
-    });
+  // 2. LinkedIn URL (Dripify) — normalize the incoming URL the SAME way the
+  //    importer normalized the stored one, or the exact lookup silently misses.
+  const url = normLinkedin(k.linkedinUrl);
+  if (url) {
+    const lead = await prisma.lead.findUnique({ where: { linkedinUrl: url } });
     if (lead) return { lead, matchType: "linkedin" as const };
   }
   // 3. email (Calendly fallback / landing form)
@@ -32,13 +63,20 @@ async function matchLead(k: Ladder) {
     const lead = await prisma.lead.findFirst({ where: { email: k.email } });
     if (lead) return { lead, matchType: "email" as const };
   }
-  // 4. company + unique name -> only auto-accept if exactly one
-  if (k.name && k.company) {
-    const candidates = await prisma.lead.findMany({
-      where: { name: k.name, company: k.company },
-    });
-    if (candidates.length === 1)
-      return { lead: candidates[0], matchType: "fuzzy" as const };
+  // 4. name match. We only ever match against our own list (we don't import
+  //    external leads), so a UNIQUE name is trusted on its own — a CIO who
+  //    moved from Shock Tech to Eagle's Honor is still the same Raymond.
+  //    Company is only used to break a tie when the name isn't unique.
+  if (k.name) {
+    const all = await prisma.lead.findMany();
+    const hits = all.filter((l) => nameLooksSame(k.name!, l.name));
+    if (hits.length === 1) return { lead: hits[0], matchType: "name" as const };
+    if (hits.length > 1 && k.company) {
+      const nc = normCompany(k.company);
+      const narrowed = hits.filter((l) => normCompany(l.company) === nc);
+      if (narrowed.length === 1)
+        return { lead: narrowed[0], matchType: "fuzzy" as const };
+    }
   }
   return null;
 }
@@ -61,24 +99,37 @@ export async function handleDripify(body: {
   title?: string;
   company?: string;
   email?: string;
+  raw?: unknown;
 }) {
   const match = await matchLead({ linkedinUrl: body.linkedin_url, name: body.name, company: body.company });
   if (!match) {
-    await review(`Dripify "${body.event}" for unknown profile ${body.linkedin_url}`, body);
+    // Genuinely couldn't place it (no URL/email match and the name was either
+    // unknown or ambiguous). Rare in a 200-list. We DON'T guess wrong and we
+    // DON'T bother Adam — just leave a silent backstop note for SAWA, with the
+    // raw payload, in case someone wants to place it by hand later.
+    const who = body.name || body.linkedin_url || "an unknown profile";
+    await review(`Dripify "${body.event}" we couldn't place: ${who}`, body.raw ?? body);
     return { status: "review" };
   }
-  const lead = match.lead;
-  const stage = EVENT_TO_STAGE[body.event];
+  await applyDripifyEvent(match.lead.id, body.event);
+  return { status: "ok", leadId: match.lead.id };
+}
+
+// Advance a known lead for a Dripify event (the webhook's auto-match path).
+export async function applyDripifyEvent(leadId: number, event: string) {
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  if (!lead) return null;
+  const stage = EVENT_TO_STAGE[event];
   await prisma.lead.update({
-    where: { id: lead.id },
+    where: { id: leadId },
     data: {
       stage: stage ?? lead.stage,
       // suppress email the moment they reply (SPEC.md §6.6)
-      emailSuppressed: body.event === "replied" ? true : lead.emailSuppressed,
+      emailSuppressed: event === "replied" ? true : lead.emailSuppressed,
     },
   });
-  await addEvent(lead.id, body.event);
-  return { status: "ok", leadId: lead.id };
+  await addEvent(leadId, event);
+  return lead;
 }
 
 // ---- Calendly: booking_created | booking_canceled ----
@@ -139,7 +190,7 @@ export async function handleInbound(body: {
     company: body.company,
   });
 
-  if (match && (match.matchType === "id" || match.matchType === "linkedin" || match.matchType === "email")) {
+  if (match && (match.matchType === "id" || match.matchType === "linkedin" || match.matchType === "email" || match.matchType === "name")) {
     // Known person who also signed up -> link, don't duplicate.
     await prisma.lead.update({
       where: { id: match.lead.id },
