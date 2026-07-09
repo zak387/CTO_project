@@ -37,7 +37,16 @@ async function cal<T>(token: string, url: string): Promise<T> {
 
 export async function syncCalendlyDinnerBookings() {
   const token = process.env.CALENDLY;
-  if (!token) return { ok: false as const, error: "CALENDLY token is not set in the environment." };
+  if (!token) {
+    // Safe diagnostic: names only, never values. Reveals casing/scope mistakes
+    // (e.g. a stray lowercase "calendly") without leaking the secret.
+    return {
+      ok: false as const,
+      error: "CALENDLY token is not set in the environment.",
+      seen: Object.keys(process.env).filter((k) => /calend/i.test(k)),
+      cronSecretPresent: !!process.env.CRON_SECRET,
+    };
+  }
 
   // 1. Whose account → which organization.
   const me = await cal<Me>(token, `${API}/users/me`);
