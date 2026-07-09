@@ -14,11 +14,17 @@ const daysToEvent = () =>
   Math.max(0, Math.ceil((new Date("2026-07-22").getTime() - Date.now()) / 86400000));
 
 export default function Pipeline() {
-  const { leads, refresh } = useLeads();
+  const { leads: allLeads, refresh } = useLeads();
   const [channel, setChannel] = useState<"outbound" | "inbound">("outbound");
+  const [campaign, setCampaign] = useState<"all" | "1" | "2">("all");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const selected = leads.find((l) => l.id === selectedId) ?? null;
+  // Campaign filter scopes the whole board. "all" shows everything; "1"/"2"
+  // narrow to one outbound push (all inbound signups live under "1"). Every
+  // downstream count/column reads `leads`, so filtering here is enough.
+  const leads = campaign === "all" ? allLeads : allLeads.filter((l) => l.campaign === campaign);
+  // Look the drawer's lead up in the full set so it stays open across a switch.
+  const selected = allLeads.find((l) => l.id === selectedId) ?? null;
 
   // On mobile, start every column collapsed so you land on a compact stack of
   // tappable bars instead of scrolling through hundreds of cards.
@@ -49,6 +55,17 @@ export default function Pipeline() {
           </LiquidGlass>
           <LiquidGlass as="button" className={channel === "inbound" ? "on" : ""} tint={channel === "inbound" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setChannel("inbound")}>
             Inbound {leads.filter((l) => l.channel !== "outbound").length}
+          </LiquidGlass>
+        </div>
+        <div className="seg">
+          <LiquidGlass as="button" className={campaign === "all" ? "on" : ""} tint={campaign === "all" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setCampaign("all")}>
+            All {allLeads.length}
+          </LiquidGlass>
+          <LiquidGlass as="button" className={campaign === "1" ? "on" : ""} tint={campaign === "1" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setCampaign("1")}>
+            Campaign 1 {allLeads.filter((l) => l.campaign === "1").length}
+          </LiquidGlass>
+          <LiquidGlass as="button" className={campaign === "2" ? "on" : ""} tint={campaign === "2" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setCampaign("2")}>
+            Campaign 2 {allLeads.filter((l) => l.campaign === "2").length}
           </LiquidGlass>
         </div>
       </div>

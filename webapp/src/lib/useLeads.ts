@@ -10,6 +10,7 @@ export type Lead = {
   linkedinUrl: string | null;
   email: string | null;
   channel: string;
+  campaign: string;
   stage: string;
   emailSuppressed: boolean;
   meetingAt: string | null;

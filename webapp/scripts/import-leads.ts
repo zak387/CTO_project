@@ -1,8 +1,14 @@
 /**
  * One-time real-leads import. See docs/superpowers/specs/2026-06-17-leads-csv-import-design.md
  *
- *   npx tsx scripts/import-leads.ts data/leads.csv            # import (replaces all leads)
- *   npx tsx scripts/import-leads.ts data/leads.csv --dry-run  # preview only, no DB writes
+ *   npx tsx scripts/import-leads.ts data/leads.csv                          # REPLACE: wipe all leads, then import as campaign "1"
+ *   npx tsx scripts/import-leads.ts data/leads.csv --dry-run               # preview only, no DB writes
+ *   npx tsx scripts/import-leads.ts data/leads.csv --append --campaign=2   # ADD a second campaign — keeps existing leads
+ *
+ * --append   : do NOT delete anything; insert on top of the existing list. REQUIRED for a
+ *              second campaign, or the default replace-semantics would wipe live campaign-1 data.
+ * --campaign : stamp every imported row with this campaign tag (default "1"). Feeds the
+ *              All / Campaign 1 / Campaign 2 switcher on the pipeline board.
  *
  * The CSV holds real PII and lives in the gitignored webapp/data/ folder — never committed.
  * Imported leads land at stage "connection_sent" (the board's pre-reply bucket); they jump
@@ -27,7 +33,20 @@ if (fs.existsSync(envPath)) {
 // ---- args ----
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
-const file = args.find((a) => !a.startsWith("--"));
+const append = args.includes("--append");
+
+// --campaign accepts either "--campaign=2" or "--campaign 2". Default "1".
+const campaignIdx = args.indexOf("--campaign");
+const campaign =
+  args.find((a) => a.startsWith("--campaign="))?.split("=")[1] ??
+  (campaignIdx !== -1 ? args[campaignIdx + 1] : undefined) ??
+  "1";
+
+// The CSV path is the only positional arg — but skip the value that follows a
+// space-form "--campaign 2" so it isn't mistaken for the file.
+const file = args.find(
+  (a, idx) => !a.startsWith("--") && !(campaignIdx !== -1 && idx === campaignIdx + 1),
+);
 
 function die(msg: string): never {
   console.error(`✖ ${msg}`);
@@ -136,7 +155,8 @@ for (let r = 1; r < grid.length; r++) {
 
 // ---- summary helpers ----
 function reportSummary() {
-  console.log(`\nParsed ${grid.length - 1} data row(s) → ${leads.length} to import, ${skipped.length} skipped.`);
+  console.log(`\nMode: ${append ? "APPEND" : "REPLACE"} · campaign "${campaign}"`);
+  console.log(`Parsed ${grid.length - 1} data row(s) → ${leads.length} to import, ${skipped.length} skipped.`);
   if (skipped.length) {
     const byReason = new Map<string, number>();
     for (const s of skipped) byReason.set(s.reason.replace(/\(.*\)/, "(…)"), (byReason.get(s.reason.replace(/\(.*\)/, "(…)")) ?? 0) + 1);
@@ -159,11 +179,16 @@ async function main() {
   const { PrismaClient } = await import("@prisma/client");
   const prisma = new PrismaClient();
   try {
-    // Replace semantics: clear fake seed + any prior import, then insert the real list.
-    // Deletion only runs now, after the CSV parsed cleanly, so a bad file never wipes data.
-    await prisma.event.deleteMany();
-    await prisma.reviewItem.deleteMany();
-    await prisma.lead.deleteMany();
+    if (append) {
+      // Additive load (a second campaign): touch nothing that already exists.
+      console.log(`\n+ Append mode: keeping existing leads, adding as campaign "${campaign}".`);
+    } else {
+      // Replace semantics: clear fake seed + any prior import, then insert the real list.
+      // Deletion only runs now, after the CSV parsed cleanly, so a bad file never wipes data.
+      await prisma.event.deleteMany();
+      await prisma.reviewItem.deleteMany();
+      await prisma.lead.deleteMany();
+    }
 
     await prisma.lead.createMany({
       data: leads.map((l) => ({
@@ -173,14 +198,18 @@ async function main() {
         linkedinUrl: l.linkedinUrl,
         email: l.email,
         channel: "outbound",
+        campaign,
         stage: "connection_sent",
         emailSuppressed: false,
       })),
+      // A person already on the list (same LinkedIn URL, e.g. also in campaign 1)
+      // is skipped rather than crashing the whole append on the unique constraint.
+      skipDuplicates: true,
     });
 
     const count = await prisma.lead.count();
     reportSummary();
-    console.log(`\n✓ Imported. Database now holds ${count} lead(s), all at "Connection Sent".`);
+    console.log(`\n✓ Imported as campaign "${campaign}". Database now holds ${count} lead(s) total.`);
   } finally {
     await prisma.$disconnect();
   }
