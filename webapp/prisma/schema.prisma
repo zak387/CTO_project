@@ -13,32 +13,33 @@ datasource db {
 
 // One record per person.
 model Lead {
-  id            Int      @id @default(autoincrement())
-  name          String
-  title         String
-  company       String
-  linkedinUrl   String?  @unique
-  email         String?
-  channel       String   // "outbound" | "inbound" | "both"
-  stage         String   // see stage lists in SPEC.md §2
+  id              Int     @id @default(autoincrement())
+  name            String
+  title           String
+  company         String
+  linkedinUrl     String? @unique
+  email           String?
+  channel         String // "outbound" | "inbound" | "both"
+  campaign        String  @default("1") // which outbound push: "1" (original list + all inbound) | "2" (second Dripify campaign). Stamped at import; default "1" backfills every existing lead.
+  stage           String // see stage lists in SPEC.md §2
   emailSuppressed Boolean @default(false)
-  notes         String?
+  notes           String?
 
-  meetingAt     DateTime?
-  meetingEmail  String?
+  meetingAt    DateTime?
+  meetingEmail String?
 
-  events        Event[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  events    Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // The timeline — one row per thing that happened.
 model Event {
-  id        Int      @id @default(autoincrement())
-  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  leadId    Int
-  type      String   // connection_sent | connected | message_sent | replied | signed_up | emailed | booked | cancelled
-  at        DateTime @default(now())
+  id     Int      @id @default(autoincrement())
+  lead   Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId Int
+  type   String // connection_sent | connected | message_sent | replied | signed_up | emailed | booked | cancelled
+  at     DateTime @default(now())
 }
 
 // Items the Reconciliation Queue couldn't place with certainty.
@@ -52,11 +53,11 @@ model ReviewItem {
 // LinkedIn content posts (Artefacts → Posts calendar, SPEC.md §4).
 model Post {
   id            Int      @id @default(autoincrement())
-  hook          String   // short calendar label
-  body          String   // the LinkedIn post text
+  hook          String // short calendar label
+  body          String // the LinkedIn post text
   scheduledDate DateTime // intended publish day
-  status        String   // "draft" | "scheduled" | "live"
-  note          String?  // internal SAWA note
+  status        String // "draft" | "scheduled" | "live"
+  note          String? // internal SAWA note
   approved      Boolean  @default(false) // Adam's optional approve
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -67,15 +68,23 @@ model Post {
 // same edit/save/approve mechanism as Post.
 model OutreachMessage {
   id        Int      @id @default(autoincrement())
-  channel   String   // "linkedin" | "email"
-  label     String   // e.g. "Connection request note", "Follow-up #1"
-  step      Int      // ordering within its channel's sequence
-  meta      String?  // when it sends, e.g. "day 2 after connect"
-  subject   String?  // email subject line (email channel only)
-  body      String   // the message copy
-  status    String   // "needs_review" | "scheduled" | "live"
-  note      String?  // internal SAWA note
+  channel   String // "linkedin" | "email"
+  label     String // e.g. "Connection request note", "Follow-up #1"
+  step      Int // ordering within its channel's sequence
+  meta      String? // when it sends, e.g. "day 2 after connect"
+  subject   String? // email subject line (email channel only)
+  body      String // the message copy
+  status    String // "needs_review" | "scheduled" | "live"
+  note      String? // internal SAWA note
   approved  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Ledger of Supabase `subscribers` rows already imported as leads, so the daily
+// sync never imports the same signup twice (see specs/2026-07-09-supabase-signups-sync-design.md).
+model SignupSync {
+  supabaseId String   @id      // subscribers.id (uuid)
+  leadId     Int?               // the lead it became / linked to (null if it went to review)
+  createdAt  DateTime @default(now())
 }

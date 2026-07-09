@@ -238,6 +238,7 @@ export async function handleInbound(body: {
   company: string;
   title?: string;
   linkedin_url?: string;
+  notes?: string;
 }) {
   const match = await matchLead({
     email: body.email,
@@ -271,6 +272,7 @@ export async function handleInbound(body: {
       linkedinUrl: body.linkedin_url || null,
       channel: "inbound",
       stage: "signed_up",
+      notes: body.notes ?? null,
     },
   });
   await addEvent(lead.id, "signed_up");

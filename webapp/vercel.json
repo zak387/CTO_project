@@ -1,5 +1,6 @@
 {
   "crons": [
-    { "path": "/api/calendly/sync", "schedule": "0 9 * * *" }
+    { "path": "/api/calendly/sync", "schedule": "0 9 * * *" },
+    { "path": "/api/sync/supabase", "schedule": "0 10 * * *" }
   ]
 }
