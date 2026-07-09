@@ -8,7 +8,7 @@ type Post = {
 };
 
 const CELL_LABEL: Record<string, string> = { draft: "DRAFT", scheduled: "SCHEDULED", live: "LIVE" };
-const DOW = [1, 3, 5]; // Mon, Wed, Fri
+const DOW = [2, 3, 4]; // Tue, Wed, Thu
 
 function weekStart(iso: string) {
   const x = new Date(iso);
@@ -73,7 +73,7 @@ export default function PostsCalendar() {
       {/* calendar */}
       <div className="cal">
         <div className="colhdr"></div>
-        <div className="colhdr">Mon</div><div className="colhdr">Wed</div><div className="colhdr">Fri</div>
+        <div className="colhdr">Tue</div><div className="colhdr">Wed</div><div className="colhdr">Thu</div>
         {weeks.map((w) => (
           <Fragment key={w.key}>
             <div className="wklbl">{w.label}</div>
