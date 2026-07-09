@@ -142,11 +142,18 @@ const CAMPAIGN_EVENT_TYPE = /dinner/i;
 
 async function bookLead(leadId: number, body: { start_time?: string; invitee_email?: string }) {
   const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  const when = body.start_time ? new Date(body.start_time) : new Date();
+  // Idempotent: if this exact booking is already recorded (same lead, same slot)
+  // don't re-write or add a duplicate "booked" event. This lets the safety-net
+  // sync re-run freely and absorbs Calendly's own webhook retries.
+  if (lead?.stage === "booked" && lead.meetingAt && Math.abs(lead.meetingAt.getTime() - when.getTime()) < 1000) {
+    return { status: "ok" as const, leadId };
+  }
   await prisma.lead.update({
     where: { id: leadId },
     data: {
       stage: "booked",
-      meetingAt: body.start_time ? new Date(body.start_time) : new Date(),
+      meetingAt: when,
       meetingEmail: body.invitee_email ?? lead?.email ?? null,
       emailSuppressed: true, // booked => stop nudging (SPEC.md §6.6)
     },
@@ -156,6 +163,12 @@ async function bookLead(leadId: number, body: { start_time?: string; invitee_ema
 }
 
 async function cancelLead(leadId: number) {
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  // Idempotent: nothing to undo if they aren't currently booked (already
+  // cancelled, or never booked). Prevents the sync from stacking cancel events.
+  if (lead && lead.stage !== "booked" && !lead.meetingAt) {
+    return { status: "ok" as const, leadId };
+  }
   // Booked count must be able to decrement (SPEC.md §9). Drop back to "replied"
   // — they had engaged enough to book.
   await prisma.lead.update({
