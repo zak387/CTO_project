@@ -132,6 +132,40 @@ export async function applyDripifyEvent(leadId: number, event: string) {
   return lead;
 }
 
+// Bookings on Adam's dedicated NYC dinner event type are campaign bookings by
+// definition (the link only goes to invited prospects). His generic
+// 15/30/60-minute links are unrelated business — noise. This is the reliable
+// campaign marker that replaces guessing from name/company.
+// The live link is calendly.com/atowvim/nyc-dinner, whose event title contains
+// "dinner"; Calendly puts that title in scheduled_event.name, which we match on.
+const CAMPAIGN_EVENT_TYPE = /dinner/i;
+
+async function bookLead(leadId: number, body: { start_time?: string; invitee_email?: string }) {
+  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: {
+      stage: "booked",
+      meetingAt: body.start_time ? new Date(body.start_time) : new Date(),
+      meetingEmail: body.invitee_email ?? lead?.email ?? null,
+      emailSuppressed: true, // booked => stop nudging (SPEC.md §6.6)
+    },
+  });
+  await addEvent(leadId, "booked");
+  return { status: "ok" as const, leadId };
+}
+
+async function cancelLead(leadId: number) {
+  // Booked count must be able to decrement (SPEC.md §9). Drop back to "replied"
+  // — they had engaged enough to book.
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { stage: "replied", meetingAt: null, meetingEmail: null },
+  });
+  await addEvent(leadId, "cancelled");
+  return { status: "ok" as const, leadId };
+}
+
 // ---- Calendly: booking_created | booking_canceled ----
 export async function handleCalendly(body: {
   event: string;
@@ -140,39 +174,48 @@ export async function handleCalendly(body: {
   start_time?: string;
   name?: string;
   company?: string;
+  event_type_name?: string;
 }) {
+  const isCampaign = CAMPAIGN_EVENT_TYPE.test(body.event_type_name ?? "");
+  const cancel = body.event === "booking_canceled";
   const match = await matchLead({
     leadId: body.lead_id,
     email: body.invitee_email,
     name: body.name,
     company: body.company,
   });
-  if (!match) {
-    await review(`Calendly booking we couldn't place (${body.invitee_email ?? "no email"})`, body);
-    return { status: "review" };
-  }
-  const lead = match.lead;
 
-  if (body.event === "booking_canceled") {
-    await prisma.lead.update({
-      where: { id: lead.id },
-      data: { stage: "replied", meetingAt: null, meetingEmail: null },
-    });
-    await addEvent(lead.id, "cancelled");
-    return { status: "ok", leadId: lead.id };
-  }
+  // Generic link (not the dinner link): Adam's other, unrelated business. We pull
+  // ONLY meetings booked through the NYC dinner link, so anything else is ignored
+  // outright — even a known lead who booked the wrong link (that's not a campaign
+  // booking, and counting it would inflate the goal number).
+  if (!isCampaign) return { status: "ignored" };
 
-  await prisma.lead.update({
-    where: { id: lead.id },
+  // Campaign link (NYC Dinner). Every booking here counts.
+  if (match) {
+    return cancel ? cancelLead(match.lead.id) : bookLead(match.lead.id, body);
+  }
+  // Booked the dinner link but isn't (confidently) in the list — a real campaign
+  // booking we must not lose. A cancellation of an unknown is a no-op; a new
+  // booking becomes an inbound lead already at "booked", so the count stays
+  // accurate and the person is visible on the board (SAWA can merge any dupe).
+  if (cancel) return { status: "ignored" };
+  const lead = await prisma.lead.create({
     data: {
+      name: body.name || "(unknown)",
+      title: "",
+      company: body.company ?? "",
+      email: body.invitee_email || null,
+      linkedinUrl: null,
+      channel: "inbound",
       stage: "booked",
-      meetingAt: body.start_time ? new Date(body.start_time) : new Date(),
-      meetingEmail: body.invitee_email ?? lead.email,
       emailSuppressed: true,
+      meetingAt: body.start_time ? new Date(body.start_time) : new Date(),
+      meetingEmail: body.invitee_email ?? null,
     },
   });
   await addEvent(lead.id, "booked");
-  return { status: "ok", leadId: lead.id };
+  return { status: "created", leadId: lead.id };
 }
 
 // ---- Landing page: new inbound signup ----
