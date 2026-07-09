@@ -35,7 +35,9 @@ export default function Pipeline() {
     }
   }, []);
 
-  const stages = channel === "inbound" ? INBOUND_STAGES : OUTBOUND_STAGES;
+  // Booked leads live only in Meetings (left nav) — drop the "Booked" column
+  // from both boards so the pipeline shows just the work-in-progress stages.
+  const stages = (channel === "inbound" ? INBOUND_STAGES : OUTBOUND_STAGES).filter((s) => s !== "booked");
   const inChannel = (l: Lead) => l.channel === channel || l.channel === "both";
   const visible = leads.filter(inChannel);
   const toggle = (s: string) => setCollapsed((c) => ({ ...c, [s]: !c[s] }));
@@ -59,13 +61,13 @@ export default function Pipeline() {
         </div>
         <div className="seg">
           <LiquidGlass as="button" className={campaign === "all" ? "on" : ""} tint={campaign === "all" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setCampaign("all")}>
-            All {allLeads.length}
+            All ({allLeads.length})
           </LiquidGlass>
           <LiquidGlass as="button" className={campaign === "1" ? "on" : ""} tint={campaign === "1" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setCampaign("1")}>
-            Campaign 1 {allLeads.filter((l) => l.campaign === "1").length}
+            Campaign 1 ({allLeads.filter((l) => l.campaign === "1").length})
           </LiquidGlass>
           <LiquidGlass as="button" className={campaign === "2" ? "on" : ""} tint={campaign === "2" ? "rgba(37,99,235,.16)" : undefined} onClick={() => setCampaign("2")}>
-            Campaign 2 {allLeads.filter((l) => l.campaign === "2").length}
+            Campaign 2 ({allLeads.filter((l) => l.campaign === "2").length})
           </LiquidGlass>
         </div>
       </div>
@@ -75,7 +77,7 @@ export default function Pipeline() {
           const cards = visible.filter((l) => l.stage === stage);
           const isCollapsed = !!collapsed[stage];
           return (
-            <div className={`col ${stage === "replied" ? "replied" : ""} ${stage === "booked" ? "booked" : ""} ${isCollapsed ? "collapsed" : ""}`} key={stage}>
+            <div className={`col ${stage === "replied" ? "replied" : ""} ${isCollapsed ? "collapsed" : ""}`} key={stage}>
               <button className="col-h" onClick={() => toggle(stage)} aria-expanded={!isCollapsed}>
                 <div className="t"><span className="led" style={{ background: LED[stage] }} /> {STAGE_LABELS[stage]}</div>
                 <span className="ct">{cards.length}</span>
@@ -87,9 +89,6 @@ export default function Pipeline() {
                     <div className="lc" key={l.id} onClick={() => setSelectedId(l.id)}>
                       <div className="nm">{l.name}</div>
                       <div className="ro">{l.title} · {l.company}</div>
-                      {stage === "booked" && l.meetingAt && (
-                        <span className="mt">{new Date(l.meetingAt).toLocaleString("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-                      )}
                     </div>
                   ))}
                 </div>
