@@ -16,6 +16,20 @@
 
 ---
 
+## Execution addendum — surgical staging (READ FIRST)
+
+There is **uncommitted in-flight work** in the tree (a Calendly safety-net sync). To avoid sweeping it into this feature's commits, execution deviates from the per-task commit steps below:
+
+- **Implementer subagents do NOT run any `git` commands.** They only create/edit files and run tests/typecheck/lint. The controller performs all staging and commits.
+- **Three files already carry the user's uncommitted work**; my additions must live alongside it and stay **uncommitted** so the user commits them with their Calendly work:
+  - `webapp/prisma/schema.prisma` — append the `SignupSync` model only; do not reformat the rest of the file.
+  - `webapp/src/lib/reconcile.ts` — add `notes` to `handleInbound` only.
+  - `webapp/vercel.json` — **already exists** with a Calendly cron. **Merge** the Supabase cron into the existing `crons` array (do NOT overwrite). Use schedule `0 10 * * *` (offset from the Calendly job's `0 9 * * *`).
+- **Wholly-new files are committed** by the controller, by explicit path: `subscriber-map.ts`, `subscriber-map.test.ts`, `supabase.ts`, `signups.ts`, `route.ts`, `scripts/check-supabase-read.ts`. `package.json` is currently clean, so its dependency + `test` script addition is committed too.
+- Wherever a task step says "Create `webapp/vercel.json`", treat it as "merge into the existing one". Wherever a step says `git add ... && git commit`, the controller does it and skips the three shared files.
+
+---
+
 ## File Structure
 
 | File | Responsibility |
@@ -523,7 +537,7 @@ Create `webapp/scripts/check-supabase-read.ts`:
 ```ts
 // Local sanity check: read the real Supabase `subscribers` table and print what
 // each row WOULD become as an inbound lead. Read-only; does not touch the app DB.
-// Run: npx tsx scripts/check-supabase-read.ts   (loads webapp/.env)
+// Run: npx tsx --env-file=.env scripts/check-supabase-read.ts   (loads webapp/.env)
 import { getSupabase } from "../src/lib/supabase";
 import { mapSubscriber, type Subscriber } from "../src/lib/subscriber-map";
 
@@ -549,7 +563,7 @@ main().catch((e) => { console.error(e); process.exit(1); });
 
 - [ ] **Step 2: Run it**
 
-Run: `npx tsx scripts/check-supabase-read.ts`
+Run: `npx tsx --env-file=.env scripts/check-supabase-read.ts`
 Expected: prints ~10 rows, each with a sensible derived name + company, e.g.:
 ```
   m.zimmermann@criteo.com
